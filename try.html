@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>直尺平放-三角板斜邊平移模擬器(長度標註版)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 660px;
+            width: 100%;
+        }
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 420px;
+            background-color: #fafafa;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        label {
+            font-weight: bold;
+            color: #333;
+            min-width: 120px;
+        }
+        input[type="range"] {
+            flex: 1;
+            cursor: pointer;
+        }
+        .btn {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .instructions {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            background: #eef2f7;
+            padding: 10px 15px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="canvas-container">
+        <canvas id="simCanvas" width="640" height="420"></canvas>
+    </div>
+    
+    <div class="controls">
+        <div class="control-row">
+            <label for="slideRange">🏃‍♂️ 三角板向右平移:</label>
+            <input type="range" id="slideRange" min="0" max="240" value="0">
+            <span id="distVal" style="font-weight:bold; color:#d9534f; width:60px;">0 cm</span>
+        </div>
+        <div class="control-row">
+            <button class="btn" id="drawBtn">🖊️ 沿斜邊畫平行線</button>
+            <button class="btn" id="resetBtn" style="background-color: #6c757d;">🔄 重置軌跡</button>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <strong>📏 幾何長度與數值設計：</strong><br>
+        1. <b>直尺刻度</b>：總長 50 cm，畫面上標有數字與精細刻度線。<br>
+        2. <b>三角板尺寸</b>：設定為經典的 <b>30 cm (底) × 20 cm (高)</b> 直角三角板（斜邊約 36 cm）。<br>
+        3. <b>平移距離標記</b>：當您拖動滑桿時，直尺上方會出現一條紅色的<b>雙向箭頭</b>，即時計算並顯示平移的具體距離。
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    const slideRange = document.getElementById('slideRange');
+    const distVal = document.getElementById('distVal');
+    const drawBtn = document.getElementById('drawBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    let isDrawn = false;
+
+    // 單位換算比例：1 cm = 8 像素
+    const SCALE = 8; 
+
+    // 幾何核心配置 (以 cm 為單位設計，繪製時乘以 SCALE)
+    const rulerCM = { x: 5, y: 35, w: 70, h: 5 }; // 直尺：50cm長，5cm寬 (畫布邊距預留)
+    const triStartCM = { x: 12, w: 30, h: 20 };    // 三角板：底邊30cm，高度20cm
+    const hypCM = Math.sqrt(triStartCM.w * triStartCM.w + triStartCM.h * triStartCM.h); // 斜邊約 36.06 cm
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 1. 背景微弱網格
+        ctx.strokeStyle = '#f8f9fa';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < canvas.width; i += 20) {
+            ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+        }
+
+        // 取得當前平移像素並換算成 cm (保留一位小數)
+        const shiftX = parseInt(slideRange.value, 10);
+        const shiftCM = (shiftX / SCALE).toFixed(1);
+        distVal.textContent = shiftCM + ' cm';
+
+        const rulerY_Px = rulerCM.y * SCALE;
+
+        // 2. 繪製斜向平行線軌跡（沿著三角尺的斜邊延伸）
+        if (isDrawn) {
+            ctx.strokeStyle = '#d9534f';
+            ctx.lineWidth = 3;
+            
+            [0, shiftX].forEach((posPx) => {
+                const x1 = (triStartCM.x) * SCALE + posPx;
+                const y1 = rulerY_Px - (triStartCM.h * SCALE);
+                const x2 = (triStartCM.x + triStartCM.w) * SCALE + posPx;
+                const y2 = rulerY_Px;
+
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+
+                ctx.beginPath();
+                ctx.moveTo(x1 - dx * 0.3, y1 - dy * 0.3); // 向上延伸
+                ctx.lineTo(x2 + dx * 0.2, y2 + dy * 0.2); // 向下延伸
+                ctx.stroke();
+            });
+        }
+
+        // 3. 繪製水平固定的「直尺」
+        ctx.fillStyle = 'rgba(240, 173, 78, 0.85)';
+        ctx.strokeStyle = '#ec971f';
+        ctx.lineWidth = 2;
+        ctx.fillRect(rulerCM.x * SCALE, rulerY_Px, rulerCM.w * SCALE, rulerCM.h * SCALE);
+        ctx.strokeRect(rulerCM.x * SCALE, rulerY_Px, rulerCM.w * SCALE, rulerCM.h * SCALE);
+        
+        // 直尺刻度與數字標註 (每 1 cm 一格，每 5 cm 一個大刻度與數字)
+        ctx.fillStyle = '#555';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'center';
+        
+        for (let cm = 0; cm <= 50; cm++) {
+            const curX = (rulerCM.x + cm) * SCALE;
+            ctx.strokeStyle = '#ec971f';
+            ctx.lineWidth = 1;
+            
+            ctx.beginPath();
+            ctx.moveTo(curX, rulerY_Px);
+            if (cm % 5 === 0) {
+                ctx.lineTo(curX, rulerY_Px + 12);
+                ctx.fillText(cm, curX, rulerY_Px + 25); // 寫上直尺公分數
+            } else {
+                ctx.lineTo(curX, rulerY_Px + 6);
+            }
+            ctx.stroke();
+        }
+
+        // 4. 繪製動態平移的「紅色距離指示線」（雙向箭頭）
+        if (shiftX > 5) {
+            const startArrowX = triStartCM.x * SCALE;
+            const endArrowX = startArrowX + shiftX;
+            const arrowY = rulerY_Px - 15;
+
+            ctx.strokeStyle = '#d9534f';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(startArrowX, arrowY);
+            ctx.lineTo(endArrowX, arrowY);
+            // 左箭頭
+            ctx.moveTo(startArrowX, arrowY); ctx.lineTo(startArrowX + 5, arrowY - 4);
+            ctx.moveTo(startArrowX, arrowY); ctx.lineTo(startArrowX + 5, arrowY + 4);
+            // 右箭頭
+            ctx.moveTo(endArrowX, arrowY); ctx.lineTo(endArrowX - 5, arrowY - 4);
+            ctx.moveTo(endArrowX, arrowY); ctx.lineTo(endArrowX - 5, arrowY + 4);
+            ctx.stroke();
+
+            // 標註平移文字
+            ctx.fillStyle = '#d9534f';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.fillText(`平移 ${shiftCM} cm`, (startArrowX + endArrowX) / 2, arrowY - 6);
+        }
+
+        // 5. 繪製三角板
+        const tx = triStartCM.x * SCALE + shiftX;
+        const ty = rulerY_Px;
+        const tw = triStartCM.w * SCALE;
+        const th = triStartCM.h * SCALE;
+
+        ctx.fillStyle = 'rgba(91, 192, 222, 0.7)';
+        ctx.strokeStyle = '#31b0d5';
+        ctx.lineWidth = 2;
+        
+        ctx.beginPath();
+        ctx.moveTo(tx, ty);       // 直角頂點
+        ctx.lineTo(tx + tw, ty);  // 底邊右端
+        ctx.lineTo(tx, ty - th);  // 垂直邊上端
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // 畫出直角符號
+        ctx.strokeStyle = '#31b0d5';
+        ctx.beginPath();
+        ctx.moveTo(tx + 12, ty); ctx.lineTo(tx + 12, ty - 12); ctx.lineTo(tx, ty - 12);
+        ctx.stroke();
+
+        // 三角板內部中空結構
+        ctx.fillStyle = '#fafafa';
+        ctx.beginPath();
+        ctx.moveTo(tx + 15, ty - 15);
+        ctx.lineTo(tx + tw - 35, ty - 15);
+        ctx.lineTo(tx + 15, ty - th + 25);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // 6. 標註三角板自身的三邊長度數字
+        ctx.fillStyle = '#0056b3';
+        ctx.font = 'bold 12px sans-serif';
+        
+        // 底邊長度
+        ctx.textAlign = 'center';
+        ctx.fillText(`${triStartCM.w} cm`, tx + tw / 2, ty - 5);
+        
+        // 高度 (垂直邊)
+        ctx.textAlign = 'right';
+        ctx.fillText(`${triStartCM.h} cm`, tx - 8, ty - th / 2);
+        
+        // 斜邊長度 (配合斜率旋轉角度貼齊標記)
+        ctx.save();
+        ctx.translate(tx + tw / 2, ty - th / 2);
+        const angle = Math.atan2(-th, tw);
+        ctx.rotate(angle);
+        ctx.textAlign = 'center';
+        ctx.fillText(`斜邊 ≈ ${hypCM.toFixed(1)} cm`, 0, -8);
+        ctx.restore();
+    }
+
+    // 監聽控制元件
+    slideRange.addEventListener('input', draw);
+
+    // 監聽按鈕
+    drawBtn.addEventListener('click', () => {
+        isDrawn = true;
+        draw();
+    });
+
+    resetBtn.addEventListener('click', () => {
+        slideRange.value = 0;
+        isDrawn = false;
+        draw();
+    });
+
+    // 初始渲染
+    draw();
+</script>
+
+</body>
+</html>
