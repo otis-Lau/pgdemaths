@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>平行四邊形探索樂園</title>
+<style>
+  :root{
+    --blue:#2563eb;
+    --blue-d:#1e40af;
+    --green:#16a34a;
+    --orange:#f97316;
+    --ink:#0f172a;
+    --muted:#64748b;
+    --line:#e2e8f0;
+    --bg:#f1f5f9;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,-apple-system,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .topbar{
+    background:linear-gradient(135deg,#1d4ed8,#3b82f6 60%,#60a5fa);
+    color:#fff;
+    padding:22px 28px;
+    box-shadow:0 4px 20px rgba(37,99,235,.25);
+  }
+  .topbar h1{margin:0;font-size:23px;letter-spacing:.5px;}
+  .topbar p{margin:6px 0 0;font-size:14px;opacity:.88;}
+
+  .wrap{
+    max-width:1400px;margin:0 auto;padding:22px;
+    display:grid;
+    grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);
+    gap:20px;
+    align-items:start;
+  }
+  @media(max-width:1000px){ .wrap{grid-template-columns:1fr;} }
+
+  .full-width{ grid-column:1 / -1; }
+
+  .col{
+    display:flex;flex-direction:column;gap:18px;min-width:0;
+  }
+
+  .card{
+    background:#fff;border-radius:16px;padding:18px;
+    box-shadow:0 1px 3px rgba(15,23,42,.07),0 8px 24px rgba(15,23,42,.05);
+  }
+  .card h2{
+    font-size:15px;margin:0 0 12px;color:var(--blue-d);
+    letter-spacing:.5px;display:flex;align-items:center;gap:9px;
+  }
+  .card h2::before{
+    content:'';width:4px;height:16px;border-radius:2px;background:var(--blue);
+  }
+
+  .drawer-layout{
+    display:grid;
+    grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr);
+    gap:20px;align-items:start;
+  }
+  @media(max-width:900px){ .drawer-layout{grid-template-columns:1fr;} }
+
+  #dcv{
+    width:100%;aspect-ratio:520/360;display:block;
+    border-radius:12px;background:#ffffff;
+    border:1px solid var(--line);touch-action:none;
+  }
+
+  .drawer-info{ display:flex;flex-direction:column;gap:12px; }
+
+  #cv{
+    width:100%;aspect-ratio:900/620;display:block;
+    border-radius:12px;background:#fbfdff;
+    border:1px solid var(--line);touch-action:none;cursor:default;
+  }
+
+  #grid-canvas{
+    width:100%;aspect-ratio:300/230;display:block;
+    background:#fff;border-radius:9px;
+    border:1px solid var(--line);cursor:crosshair;touch-action:none;
+  }
+
+  #quiz-canvas{
+    width:100%;aspect-ratio:220/130;display:block;
+    background:#fff;border-radius:9px;
+    border:1px solid var(--line);margin-bottom:12px;
+  }
+
+  .mode-group{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .mode-btn{
+    border:2px solid var(--line);background:#fff;color:#475569;
+    border-radius:11px;padding:8px 16px;font-size:14px;font-weight:700;
+    cursor:pointer;font-family:inherit;transition:.15s;
+  }
+  .mode-btn:hover{border-color:#bfdbfe;background:#f8fafc;}
+  .mode-btn.active{
+    background:var(--blue);border-color:var(--blue);color:#fff;
+    box-shadow:0 3px 10px rgba(37,99,235,.3);
+  }
+
+  .status{
+    margin-top:12px;font-size:14.5px;font-weight:700;
+    border-radius:10px;padding:10px 14px;line-height:1.5;
+  }
+  .status.ok{background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;}
+  .status.no{background:#fef2f2;color:#b91c1c;border:1.5px solid #fecaca;}
+  .status.warn{background:#fffbeb;color:#b45309;border:1.5px solid #fde68a;}
+
+  .toolbar{
+    display:flex;flex-wrap:wrap;gap:10px 18px;
+    margin-top:14px;align-items:center;
+  }
+  .sw{
+    display:flex;align-items:center;gap:7px;
+    font-size:14px;cursor:pointer;user-select:none;color:#334155;
+  }
+  .sw input{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;}
+
+  .btn{
+    border:none;border-radius:10px;padding:9px 18px;font-size:14px;
+    font-weight:600;cursor:pointer;font-family:inherit;
+    background:var(--blue);color:#fff;transition:.15s;
+  }
+  .btn:hover{background:#1d4ed8;}
+  .btn.ghost{background:#eff6ff;color:var(--blue-d);}
+  .btn.ghost:hover{background:#dbeafe;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+
+  .hint{
+    font-size:13.5px;color:#475569;background:#fefce8;
+    border-left:4px solid #facc15;border-radius:8px;
+    padding:8px 12px;margin-top:12px;line-height:1.65;
+  }
+
+  .sub{
+    font-size:12.5px;font-weight:700;color:var(--muted);
+    letter-spacing:1px;margin:14px 0 8px;
+  }
+  .sub:first-of-type{margin-top:0;}
+  .sub.blue{color:var(--blue);}
+  .sub.orange{color:var(--orange);}
+
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .stat{
+    display:flex;justify-content:space-between;align-items:baseline;
+    background:#f8fafc;border-radius:9px;padding:8px 11px;font-size:14px;
+  }
+  .stat span{color:var(--muted);font-weight:600;}
+  .stat b{font-variant-numeric:tabular-nums;color:#0f172a;font-size:15px;}
+  .stat.blue span{color:var(--blue);}
+  .stat.orange span{color:var(--orange);}
+
+  .sumline{
+    margin-top:10px;font-size:14px;background:#f0fdf4;
+    border-radius:9px;padding:9px 12px;display:flex;
+    justify-content:space-between;align-items:center;gap:8px;
+  }
+  .sumline b{font-variant-numeric:tabular-nums;color:#047857;font-size:15px;}
+  .chip{
+    font-size:12px;font-weight:700;color:#047857;
+    background:#dcfce7;border-radius:20px;padding:3px 10px;
+  }
+
+  .props{margin:0;padding-left:20px;font-size:14px;line-height:2;color:#334155;}
+  .props li::marker{color:var(--blue);}
+  .props b{color:var(--blue-d);}
+
+  .discovery{font-size:13.5px;line-height:1.8;color:#334155;}
+  .discovery p{margin:0 0 8px;}
+  .discovery ol{margin:6px 0 0;padding-left:20px;}
+  .discovery li{margin-bottom:4px;}
+  .discovery li::marker{color:var(--green);font-weight:700;}
+  .discovery .highlight{
+    background:#dcfce7;border-radius:6px;padding:2px 7px;
+    font-weight:700;color:#15803d;
+  }
+
+  .edge-picker{
+    margin-bottom:12px;display:flex;gap:8px;
+    align-items:center;flex-wrap:wrap;
+  }
+  .edge-label{font-size:14px;font-weight:700;color:#475569;}
+  .edge-btn{
+    border:2px solid var(--line);background:#fff;color:#475569;
+    border-radius:10px;padding:7px 15px;font-size:13.5px;
+    font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;
+  }
+  .edge-btn:hover{border-color:#bfdbfe;background:#f8fafc;}
+  .edge-btn.active[data-edge="vertical"]{
+    background:#ef4444;border-color:#ef4444;color:#fff;
+    box-shadow:0 3px 10px rgba(239,68,68,.3);
+  }
+  .edge-btn.active[data-edge="hypotenuse"]{
+    background:#8b5cf6;border-color:#8b5cf6;color:#fff;
+    box-shadow:0 3px 10px rgba(139,92,246,.3);
+  }
+
+  .demo-text{
+    font-size:14.5px;font-weight:700;color:#1e293b;
+    background:#eff6ff;border-radius:10px;padding:11px 14px;
+    line-height:1.55;min-height:64px;
+  }
+  .demo-controls{
+    display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  }
+  .demo-controls .btn{padding:8px 14px;font-size:13.5px;}
+
+  .discovery-box{
+    background:#f0fdf4;
+    border:1.5px solid #bbf7d0;
+    border-radius:12px;
+    padding:12px 14px;
+  }
+  .discovery-box .dt{
+    font-size:13px;font-weight:800;color:#15803d;
+    letter-spacing:.5px;margin-bottom:6px;
+    display:flex;align-items:center;gap:6px;
+  }
+
+  .quiz-box{
+    background:#f8fafc;border-radius:12px;padding:14px;margin-bottom:14px;
+  }
+  .quiz-progress{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:12.5px;font-weight:700;color:var(--muted);
+    margin-bottom:10px;
+  }
+  .quiz-level{
+    font-size:11.5px;font-weight:700;border-radius:20px;
+    padding:2px 10px;
+  }
+  .quiz-level.easy{background:#dcfce7;color:#15803d;}
+  .quiz-level.hard{background:#fee2e2;color:#b91c1c;}
+  .quiz-question{
+    font-size:14.5px;font-weight:700;color:#1e293b;margin:0 0 12px;
+  }
+  .quiz-btns{display:flex;gap:8px;}
+  .btn-yes,.btn-no{
+    flex:1;border:none;border-radius:10px;padding:11px;
+    font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;
+    transition:.15s;
+  }
+  .btn-yes{background:#dcfce7;color:#15803d;}
+  .btn-yes:hover{background:#bbf7d0;}
+  .btn-no{background:#fee2e2;color:#b91c1c;}
+  .btn-no:hover{background:#fecaca;}
+  .quiz-fb{
+    margin-top:11px;font-size:14px;font-weight:600;line-height:1.6;
+    min-height:22px;
+  }
+  .quiz-fb.ok{color:#059669;}
+  .quiz-fb.no{color:#dc2626;}
+
+  #quiz-next{
+    display:none;
+    width:100%;margin-top:12px;
+    padding:11px;font-size:14.5px;
+  }
+
+  .grid-hint{
+    font-size:12.5px;color:var(--muted);margin:9px 0;
+    line-height:1.6;
+  }
+  .grid-controls{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .grid-status{
+    font-size:13.5px;font-weight:700;color:#15803d;
+    margin-top:8px;min-height:18px;line-height:1.5;
+  }
+  .grid-status.no{color:#dc2626;}
+
+  .color-toggle{
+    display:flex;align-items:center;gap:8px;
+    background:#f0f9ff;border-radius:10px;padding:9px 13px;
+    margin-top:10px;cursor:pointer;user-select:none;
+    font-size:13.5px;font-weight:700;color:#0369a1;
+    border:1.5px solid #bae6fd;transition:.15s;
+  }
+  .color-toggle:hover{background:#e0f2fe;}
+  .color-toggle input{
+    width:17px;height:17px;accent-color:#0284c7;cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <h1>平行四邊形探索樂園</h1>
+  <p>先學會畫平行線，再探索平行四邊形的奧秘！</p>
+</header>
+
+<div class="wrap">
+
+  <div class="full-width card">
+    <h2>用直尺和三角尺畫平行線</h2>
+
+    <div class="drawer-layout">
+      <div>
+        <div class="edge-picker">
+          <span class="edge-label">選擇用哪條邊畫：</span>
+          <button class="edge-btn active" data-edge="vertical">📏 直邊（豎直）</button>
+          <button class="edge-btn" data-edge="hypotenuse">📐 斜邊</button>
+        </div>
+        <canvas id="dcv"></canvas>
+      </div>
+
+      <div class="drawer-info">
+        <div class="demo-text" id="d-text">
+          ① 選擇「直邊」，把三角尺移到想要的位置，然後按「畫一條線」。
+        </div>
+        <div class="demo-controls">
+          <button class="btn" id="d-draw">✏️ 畫一條線</button>
+          <button class="btn ghost" id="d-clear">🗑️ 重新再畫</button>
+          <button class="btn ghost" id="d-reset-tri">重置三角尺</button>
+        </div>
+
+        <div class="discovery-box">
+          <div class="dt">💡 小發現</div>
+          <div class="discovery">
+            <p>怎樣畫出一對平行線呢？很簡單：</p>
+            <ol>
+              <li>把三角尺的一條邊<span class="highlight">貼緊直尺</span></li>
+              <li>沿著三角尺的另一條邊畫一條線</li>
+              <li>把三角尺<span class="highlight">沿著直尺滑動</span>到新位置</li>
+              <li>再畫一條線</li>
+            </ol>
+            <p style="margin:10px 0 0;">
+              因為三角尺移動時方向沒有改變，所以畫出來的兩條線
+              <span class="highlight">永遠不會相交</span>，也就是
+              <span class="highlight">互相平行</span>！
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col left-col">
+
+    <div class="card">
+      <h2>拖曳頂點，探索平行四邊形</h2>
+      <div class="mode-group">
+        <button class="mode-btn active" data-mode="para">🔒 平行四邊形模式</button>
+        <button class="mode-btn" data-mode="free">🔓 自由探索模式</button>
+      </div>
+
+      <canvas id="cv"></canvas>
+
+      <div id="status" class="status ok">載入中…</div>
+
+      <div class="toolbar">
+        <label class="sw"><input type="checkbox" id="t-grid" checked><span>顯示網格</span></label>
+        <label class="sw"><input type="checkbox" id="t-snap" checked><span>自動對齊網格（1cm）</span></label>
+        <label class="sw"><input type="checkbox" id="t-parallel" checked><span>對邊平行箭頭</span></label>
+        <button id="btn-reset" class="btn ghost">重設圖形</button>
+      </div>
+
+      <div class="hint">
+        💡 <span style="color:#2563eb;font-weight:700;">藍色邊</span>是第一組對邊，
+        <span style="color:#f97316;font-weight:700;">橙色邊</span>是第二組對邊。
+        試試切到「自由探索模式」，把頂點拖成梯形，看看會發生什麼事！
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>小測驗：這是平行四邊形嗎？</h2>
+
+      <div class="quiz-box">
+        <div class="quiz-progress">
+          <span id="quiz-progress-text">第 1 / 5 題</span>
+          <span class="quiz-level easy" id="quiz-level">⭐ 簡單</span>
+        </div>
+        <canvas id="quiz-canvas"></canvas>
+        <p class="quiz-question" id="quiz-question-text">觀察上面的圖形，它是平行四邊形嗎？</p>
+        <div class="quiz-btns" id="quiz-btns">
+          <button class="btn-yes" id="quiz-yes">✅ 是</button>
+          <button class="btn-no" id="quiz-no">❌ 否</button>
+        </div>
+        <button class="btn" id="quiz-next">下一題 →</button>
+        <div class="quiz-fb" id="quiz-fb"></div>
+      </div>
+
+      <button class="btn ghost" id="quiz-restart">🔄 重新開始測驗</button>
+    </div>
+
+  </div>
+
+  <div class="col right-col">
+
+    <div class="card">
+      <h2>邊長</h2>
+
+      <div class="sub blue">第一組對邊（藍色）</div>
+      <div class="stats">
+        <div class="stat blue"><span>AB</span><b id="v-ab">–</b></div>
+        <div class="stat blue"><span>CD</span><b id="v-cd">–</b></div>
+      </div>
+
+      <div class="sub orange">第二組對邊（橙色）</div>
+      <div class="stats">
+        <div class="stat orange"><span>BC</span><b id="v-bc">–</b></div>
+        <div class="stat orange"><span>AD</span><b id="v-ad">–</b></div>
+      </div>
+
+      <div class="sumline">
+        <span>AB = CD，BC = AD</span>
+        <span class="chip">對邊相等</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>✏️ 動手畫：2組平行線</h2>
+      <canvas id="grid-canvas"></canvas>
+      <p class="grid-hint">
+        點一下格子交叉點作為起點，再點另一個點畫線。<br>
+        試著畫出2組平行線，看看能否圍成平行四邊形！
+      </p>
+
+      <label class="color-toggle">
+        <input type="checkbox" id="grid-color">
+        <span>🎨 顯示兩組平行線顏色</span>
+      </label>
+
+      <div class="grid-controls">
+        <button class="btn ghost" id="grid-clear">🗑️ 重新再畫</button>
+      </div>
+      <div class="grid-status" id="grid-status"></div>
+    </div>
+
+    <div class="card">
+      <h2>平行四邊形的性質</h2>
+      <ul class="props">
+        <li>兩組<b>對邊</b>分別平行</li>
+        <li>兩組<b>對邊</b>分別相等</li>
+        <li>由兩組平行線圍成</li>
+      </ul>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ============================================================
+   共用小工具
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const len = (p,q) => Math.hypot(q.x-p.x, q.y-p.y);
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const roundRect = (c,x,y,w,h,r) => {
+  c.beginPath();
+  c.moveTo(x+r,y);
+  c.arcTo(x+w,y,x+w,y+h,r);
+  c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r);
+  c.arcTo(x,y,x+w,y,r);
+  c.closePath();
+};
+
+/* ============================================================
+   畫平行線教室
+   ============================================================ */
+const dcv  = document.getElementById('dcv');
+const dctx = dcv.getContext('2d');
+const DW = 520, DH = 360;
+
+const RULER = { x: 25, y: 290, w: 470, h: 42 };
+const tri = { x: 200, y: RULER.y, size: 100 };
+
+let drawnLines = [];
+let drawMode = 'vertical';
+let draggingTri = false;
+let dragOffsetX = 0;
+
+const DRAW_TOP = 20;
+const DRAW_BOTTOM = RULER.y;
+
+function sign(p1, p2, p3){
+  return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+}
+function pointInTriangle(px, py){
+  const p  = {x: px, y: py};
+  const p1 = {x: tri.x, y: tri.y};
+  const p2 = {x: tri.x + tri.size, y: tri.y};
+  const p3 = {x: tri.x, y: tri.y - tri.size};
+  const d1 = sign(p, p1, p2);
+  const d2 = sign(p, p2, p3);
+  const d3 = sign(p, p3, p1);
+  const hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+  const hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+  return !(hasNeg && hasPos);
+}
+
+function dToLogical(e){
+  const r = dcv.getBoundingClientRect();
+  return {
+    x: (e.clientX - r.left) / r.width * DW,
+    y: (e.clientY - r.top ) / r.height * DH
+  };
+}
+
+function hypotenusePoints(pos){
+  const baseY = tri.y - tri.size;
+  const t0 = -500;
+  const t1 =  700;
+  return {
+    x0: pos + t0, y0: baseY + t0,
+    x1: pos + t1, y1: baseY + t1
+  };
+}
+
+function getDrawState(){
+  const vLines = drawnLines.filter(l => l.type === 'v').map(l => l.pos);
+  const hLines = drawnLines.filter(l => l.type === 'h').map(l => l.pos);
+  const vCount = vLines.length;
+  const hCount = hLines.length;
+  const isParallelogram = (vCount >= 2 && hCount >= 2);
+  return { vCount, hCount, isParallelogram };
+}
+
+function dDraw(){
+  dctx.clearRect(0, 0, DW, DH);
+  dctx.fillStyle = '#ffffff';
+  dctx.fillRect(0, 0, DW, DH);
+
+  dctx.save();
+  dctx.strokeStyle = '#f1f5f9';
+  dctx.lineWidth = 1;
+  for(let x = 0; x < DW; x += 20){
+    dctx.beginPath(); dctx.moveTo(x, 0); dctx.lineTo(x, DH); dctx.stroke();
+  }
+  for(let y = 0; y < DH; y += 20){
+    dctx.beginPath(); dctx.moveTo(0, y); dctx.lineTo(DW, y); dctx.stroke();
+  }
+  dctx.restore();
+
+  const vLines = drawnLines.filter(l => l.type === 'v').map(l => l.pos);
+  const hLines = drawnLines.filter(l => l.type === 'h').map(l => l.pos);
+  const state = getDrawState();
+
+  if (state.isParallelogram){
+    const vx1 = Math.min(...vLines);
+    const vx2 = Math.max(...vLines);
+    const hp1 = Math.min(...hLines);
+    const hp2 = Math.max(...hLines);
+    const baseY = tri.y - tri.size;
+
+    const p1 = { x: vx1, y: vx1 - hp1 + baseY };
+    const p2 = { x: vx2, y: vx2 - hp1 + baseY };
+    const p3 = { x: vx2, y: vx2 - hp2 + baseY };
+    const p4 = { x: vx1, y: vx1 - hp2 + baseY };
+
+    dctx.save();
+    dctx.beginPath();
+    dctx.moveTo(p1.x, p1.y);
+    dctx.lineTo(p2.x, p2.y);
+    dctx.lineTo(p3.x, p3.y);
+    dctx.lineTo(p4.x, p4.y);
+    dctx.closePath();
+    dctx.fillStyle = 'rgba(74, 222, 128, 0.30)';
+    dctx.fill();
+    dctx.strokeStyle = 'rgba(34, 197, 94, 0.9)';
+    dctx.lineWidth = 4;
+    dctx.stroke();
+
+    const centerX = (p1.x + p3.x) / 2;
+    const centerY = (p1.y + p3.y) / 2;
+    dctx.fillStyle = '#15803d';
+    dctx.font = 'bold 18px system-ui,sans-serif';
+    dctx.textAlign = 'center';
+    dctx.textBaseline = 'middle';
+    dctx.fillText('✅ 平行四邊形！', centerX, centerY - 5);
+    dctx.font = '13px system-ui,sans-serif';
+    dctx.fillText('兩組對邊分別平行', centerX, centerY + 20);
+    dctx.restore();
+  }
+
+  dctx.save();
+  dctx.beginPath();
+  dctx.rect(2, DRAW_TOP, DW - 4, DRAW_BOTTOM - DRAW_TOP);
+  dctx.clip();
+  dctx.lineCap = 'round';
+  dctx.lineWidth = 3.5;
+  drawnLines.forEach(line => {
+    if (line.type === 'v'){
+      dctx.strokeStyle = '#ef4444';
+      dctx.beginPath();
+      dctx.moveTo(line.pos, DRAW_TOP);
+      dctx.lineTo(line.pos, DRAW_BOTTOM);
+      dctx.stroke();
+    } else {
+      const pt = hypotenusePoints(line.pos);
+      dctx.strokeStyle = '#8b5cf6';
+      dctx.beginPath();
+      dctx.moveTo(pt.x0, pt.y0);
+      dctx.lineTo(pt.x1, pt.y1);
+      dctx.stroke();
+    }
+  });
+  dctx.restore();
+
+  dctx.save();
+  dctx.fillStyle = 'rgba(253,230,138,0.95)';
+  dctx.strokeStyle = '#d97706';
+  dctx.lineWidth = 2.5;
+  roundRect(dctx, RULER.x, RULER.y, RULER.w, RULER.h, 5);
+  dctx.fill();
+  dctx.stroke();
+
+  dctx.strokeStyle = '#b45309';
+  dctx.lineWidth = 1.5;
+  for(let i = 0; i <= 47; i++){
+    const x = RULER.x + i * 10;
+    if(x > RULER.x + RULER.w - 5) break;
+    const h = (i % 5 === 0) ? 14 : 8;
+    dctx.beginPath();
+    dctx.moveTo(x, RULER.y);
+    dctx.lineTo(x, RULER.y + h);
+    dctx.stroke();
+  }
+
+  dctx.fillStyle = '#92400e';
+  dctx.font = 'bold 11px system-ui,sans-serif';
+  dctx.textAlign = 'center';
+  dctx.textBaseline = 'top';
+  for(let i = 0; i <= 47; i += 5){
+    const x = RULER.x + i * 10;
+    if(x > RULER.x + RULER.w - 10) break;
+    dctx.fillText(i / 5, x, RULER.y + 16);
+  }
+
+  dctx.fillStyle = '#92400e';
+  dctx.font = 'bold 15px system-ui,sans-serif';
+  dctx.textAlign = 'center';
+  dctx.textBaseline = 'middle';
+  dctx.fillText('直 尺', RULER.x + RULER.w/2, RULER.y + RULER.h/2 - 2);
+  dctx.restore();
+
+  if (draggingTri){
+    dctx.save();
+    dctx.beginPath();
+    dctx.rect(2, DRAW_TOP, DW - 4, DRAW_BOTTOM - DRAW_TOP);
+    dctx.clip();
+    dctx.setLineDash([8, 6]);
+    dctx.lineWidth = 3;
+    if (drawMode === 'vertical'){
+      dctx.strokeStyle = 'rgba(239,68,68,0.45)';
+      dctx.beginPath();
+      dctx.moveTo(tri.x, DRAW_TOP);
+      dctx.lineTo(tri.x, DRAW_BOTTOM);
+      dctx.stroke();
+    } else {
+      const pt = hypotenusePoints(tri.x);
+      dctx.strokeStyle = 'rgba(139,92,246,0.5)';
+      dctx.beginPath();
+      dctx.moveTo(pt.x0, pt.y0);
+      dctx.lineTo(pt.x1, pt.y1);
+      dctx.stroke();
+    }
+    dctx.restore();
+  }
+
+  dctx.save();
+  const tx = tri.x, ty = tri.y, s = tri.size;
+
+  dctx.beginPath();
+  dctx.moveTo(tx, ty);
+  dctx.lineTo(tx + s, ty);
+  dctx.lineTo(tx, ty - s);
+  dctx.closePath();
+
+  const grad = dctx.createLinearGradient(tx, ty, tx + s, ty - s);
+  grad.addColorStop(0, 'rgba(59,130,246,0.35)');
+  grad.addColorStop(1, 'rgba(37,99,235,0.15)');
+  dctx.fillStyle = grad;
+  dctx.fill();
+
+  dctx.strokeStyle = '#2563eb';
+  dctx.lineWidth = 3;
+  dctx.lineJoin = 'round';
+  dctx.stroke();
+
+  const rs = 15;
+  dctx.beginPath();
+  dctx.moveTo(tx + rs, ty);
+  dctx.lineTo(tx + rs, ty - rs);
+  dctx.lineTo(tx, ty - rs);
+  dctx.strokeStyle = '#1e40af';
+  dctx.lineWidth = 2;
+  dctx.stroke();
+
+  dctx.save();
+  dctx.lineCap = 'round';
+  dctx.setLineDash([8, 5]);
+  dctx.lineWidth = 4.5;
+  dctx.beginPath();
+  if (drawMode === 'vertical'){
+    dctx.strokeStyle = '#ef4444';
+    dctx.moveTo(tx, ty);
+    dctx.lineTo(tx, ty - s);
+  } else {
+    dctx.strokeStyle = '#8b5cf6';
+    dctx.moveTo(tx + s, ty);
+    dctx.lineTo(tx, ty - s);
+  }
+  dctx.stroke();
+  dctx.restore();
+
+  dctx.fillStyle = '#1e40af';
+  dctx.font = 'bold 15px system-ui,sans-serif';
+  dctx.textAlign = 'center';
+  dctx.textBaseline = 'middle';
+  dctx.fillText('三角尺', tx + s/2, ty - s/2 - 8);
+
+  if(!draggingTri){
+    dctx.fillStyle = '#64748b';
+    dctx.font = '13px system-ui,sans-serif';
+    dctx.fillText('👆 可拖動', tx + s/2, ty - s/2 + 14);
+  }
+  dctx.restore();
+
+  dctx.save();
+  dctx.font = '13px system-ui,sans-serif';
+  dctx.textAlign = 'left';
+  dctx.textBaseline = 'top';
+
+  const vCount = drawnLines.filter(l => l.type === 'v').length;
+  const hCount = drawnLines.filter(l => l.type === 'h').length;
+
+  let hintText = (drawMode === 'vertical')
+    ? '沿 🔴 紅色虛線（直邊）畫線'
+    : '沿 🟣 紫色虛線（斜邊）畫線';
+  dctx.fillStyle = (drawMode === 'vertical') ? '#dc2626' : '#7c3aed';
+  dctx.font = 'bold 13px system-ui,sans-serif';
+  dctx.fillText(hintText, 18, 12);
+
+  if (vCount > 0 || hCount > 0){
+    dctx.font = '13px system-ui,sans-serif';
+    let xOff = 18;
+    if (vCount > 0){
+      dctx.fillStyle = '#ef4444';
+      dctx.fillText(`🔴 直邊線 ${vCount} 條`, xOff, 34);
+      xOff += 130;
+    }
+    if (hCount > 0){
+      dctx.fillStyle = '#8b5cf6';
+      dctx.fillText(`🟣 斜邊線 ${hCount} 條`, xOff, 34);
+    }
+  }
+  dctx.restore();
+}
+
+function dResize(){
+  const r = dcv.getBoundingClientRect();
+  if (r.width < 10) return;
+  const dpr = window.devicePixelRatio || 1;
+  dcv.width  = Math.round(r.width * dpr);
+  dcv.height = Math.round(r.width * (DH/DW) * dpr);
+  dctx.setTransform(dcv.width/DW, 0, 0, dcv.height/DH, 0, 0);
+  dDraw();
+}
+window.addEventListener('resize', dResize);
+
+dcv.addEventListener('pointerdown', e => {
+  const p = dToLogical(e);
+  if(pointInTriangle(p.x, p.y)){
+    draggingTri = true;
+    dragOffsetX = p.x - tri.x;
+    dcv.setPointerCapture(e.pointerId);
+    dcv.style.cursor = 'grabbing';
+    e.preventDefault();
+  }
+});
+
+dcv.addEventListener('pointermove', e => {
+  const p = dToLogical(e);
+  if(draggingTri){
+    let newX = p.x - dragOffsetX;
+    newX = Math.max(RULER.x + 5, Math.min(RULER.x + RULER.w - tri.size - 5, newX));
+    tri.x = newX;
+    dDraw();
+  } else {
+    dcv.style.cursor = pointInTriangle(p.x, p.y) ? 'grab' : 'default';
+  }
+});
+
+function endTriDrag(){
+  if(draggingTri){
+    draggingTri = false;
+    dcv.style.cursor = 'default';
+    dDraw();
+  }
+}
+dcv.addEventListener('pointerup', endTriDrag);
+dcv.addEventListener('pointercancel', endTriDrag);
+
+function updateDemoText(){
+  const text = $('d-text');
+  const state = getDrawState();
+
+  if (drawnLines.length === 0){
+    if (drawMode === 'vertical'){
+      text.textContent = '① 選擇「直邊」，把三角尺移到想要的位置，然後按「畫一條線」。';
+    } else {
+      text.textContent = '① 選擇「斜邊」，把三角尺移到想要的位置，然後按「畫一條線」。';
+    }
+  } else if (state.isParallelogram){
+    text.textContent = '🎉 成功！兩組平行線圍出了平行四邊形！綠色區域就是證明！';
+  } else if (state.vCount >= 1 && state.hCount === 0){
+    text.textContent = `✅ 你畫了 ${state.vCount} 條直邊線，它們互相平行！切換到「斜邊」，畫出另一組平行線吧。`;
+  } else if (state.vCount === 0 && state.hCount >= 1){
+    text.textContent = `✅ 你畫了 ${state.hCount} 條斜邊線，它們互相平行！切換到「直邊」，畫出另一組平行線吧。`;
+  } else if (state.vCount === 1 && state.hCount === 1){
+    text.textContent = '⚠️ 還未圍成平行四邊形！需要至少2條直邊線和2條斜邊線，請繼續畫。';
+  } else {
+    text.textContent = `✅ 目前有 ${state.vCount} 條直邊線、${state.hCount} 條斜邊線，請繼續畫，直到圍成平行四邊形。`;
+  }
+}
+
+document.querySelectorAll('.edge-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.edge-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    drawMode = btn.dataset.edge === 'hypotenuse' ? 'hypotenuse' : 'vertical';
+    dDraw();
+    updateDemoText();
+  });
+});
+
+$('d-draw').addEventListener('click', () => {
+  const type = (drawMode === 'vertical') ? 'v' : 'h';
+  const pos = tri.x;
+
+  const tooClose = drawnLines.some(l => l.type === type && Math.abs(l.pos - pos) < 15);
+  if (tooClose){
+    const text = $('d-text');
+    text.textContent = '⚠️ 這條線和之前的線太近了，請把三角尺移到其他位置再畫。';
+    return;
+  }
+
+  drawnLines.push({ type, pos });
+  dDraw();
+  updateDemoText();
+});
+
+$('d-clear').addEventListener('click', () => {
+  drawnLines = [];
+  dDraw();
+  updateDemoText();
+});
+
+$('d-reset-tri').addEventListener('click', () => {
+  tri.x = 200;
+  dDraw();
+});
+
+/* ============================================================
+   拖拉探索（主畫布）
+   ============================================================ */
+const W = 900, H = 620;
+const CM = 50;
+const PAD = 45;
+
+const cv  = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+
+let pts = [
+  {x:200, y:450},
+  {x:600, y:450},
+  {x:750, y:200},
+  {x:350, y:200}
+];
+
+const START = pts.map(p => ({...p}));
+
+const opts = { grid:true, snap:true, parallel:true };
+
+let dragging = null;
+let freeMode = false;
+
+const COLOR_G1 = '#2563eb';
+const COLOR_G2 = '#f97316';
+
+const toCm = px => Math.round(px / CM);
+const fmtLen = cm => cm + ' cm';
+
+function polyArea(p){
+  return Math.abs((p[1].x-p[0].x)*(p[3].y-p[0].y) - (p[1].y-p[0].y)*(p[3].x-p[0].x));
+}
+
+function isConvex(A,B,C,D){
+  const cross=(p,q,r)=>(q.x-p.x)*(r.y-p.y)-(q.y-p.y)*(r.x-p.x);
+  const c1=cross(A,B,C), c2=cross(B,C,D), c3=cross(C,D,A), c4=cross(D,A,B);
+  return (c1>0&&c2>0&&c3>0&&c4>0)||(c1<0&&c2<0&&c3<0&&c4<0);
+}
+
+function parallelStatus(){
+  const [A,B,C,D] = pts;
+  const v = (p,q)=>({x:q.x-p.x, y:q.y-p.y});
+  const sinBetween = (u,w)=>{
+    const l1=Math.hypot(u.x,u.y), l2=Math.hypot(w.x,w.y);
+    if(l1<8 || l2<8) return 1;
+    return Math.abs(u.x*w.y - u.y*w.x)/(l1*l2);
+  };
+  const g1 = sinBetween(v(A,B), v(D,C)) < 0.075;
+  const g2 = sinBetween(v(B,C), v(A,D)) < 0.075;
+  return { g1, g2 };
+}
+
+function resize(){
+  const r = cv.getBoundingClientRect();
+  if (r.width < 10) return;
+  const dpr = window.devicePixelRatio || 1;
+  cv.width  = Math.round(r.width * dpr);
+  cv.height = Math.round(r.width * (H/W) * dpr);
+  ctx.setTransform(cv.width/W, 0, 0, cv.height/H, 0, 0);
+  draw();
+}
+window.addEventListener('resize', resize);
+
+function chevronMark(p, q, n, color){
+  const dx=q.x-p.x, dy=q.y-p.y;
+  const L=Math.hypot(dx,dy);
+  if(L<38) return;
+  const ux=dx/L, uy=dy/L;
+  const mx=(p.x+q.x)/2, my=(p.y+q.y)/2;
+  const s = 8;
+
+  for(let pass=0; pass<2; pass++){
+    ctx.save();
+    ctx.strokeStyle = pass===0 ? '#ffffff' : color;
+    ctx.lineWidth   = pass===0 ? 8 : 3.6;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    for(let i=0;i<n;i++){
+      const o=(i-(n-1)/2)*13;
+      const bx=mx+ux*o, by=my+uy*o;
+      const px=-uy*s, py=ux*s;
+      ctx.beginPath();
+      ctx.moveTo(bx-ux*s+px, by-uy*s+py);
+      ctx.lineTo(bx+ux*s*0.25, by+uy*s*0.25);
+      ctx.lineTo(bx-ux*s-px, by-uy*s-py);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
+function draw(){
+  const [A,B,C,D] = pts;
+  const ps = parallelStatus();
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#fbfdff';
+  ctx.fillRect(0,0,W,H);
+
+  if (opts.grid){
+    ctx.save();
+    ctx.strokeStyle = '#eef2f7';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x=0; x<=W; x+=CM){ ctx.moveTo(x,0); ctx.lineTo(x,H); }
+    for (let y=0; y<=H; y+=CM){ ctx.moveTo(0,y); ctx.lineTo(W,y); }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.beginPath();
+  ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y);
+  ctx.lineTo(C.x,C.y); ctx.lineTo(D.x,D.y);
+  ctx.closePath();
+  ctx.fillStyle = ps.g1 && ps.g2 ? 'rgba(59,130,246,0.08)' : 'rgba(239,68,68,0.08)';
+  ctx.fill();
+
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = 5;
+
+  ctx.strokeStyle = COLOR_G1;
+  ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(C.x,C.y); ctx.lineTo(D.x,D.y); ctx.stroke();
+
+  ctx.strokeStyle = COLOR_G2;
+  ctx.beginPath(); ctx.moveTo(B.x,B.y); ctx.lineTo(C.x,C.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(D.x,D.y); ctx.lineTo(A.x,A.y); ctx.stroke();
+
+  if (opts.parallel){
+    if (ps.g1){
+      chevronMark(A, B, 1, COLOR_G1);
+      chevronMark(D, C, 1, COLOR_G1);
+    }
+    if (ps.g2){
+      chevronMark(B, C, 2, COLOR_G2);
+      chevronMark(A, D, 2, COLOR_G2);
+    }
+  }
+
+  pts.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 10, 0, Math.PI*2);
+    ctx.fillStyle = '#334155';
+    ctx.fill();
+    ctx.lineWidth = 3.5;
+    ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
+  });
+
+  const cx = (A.x+B.x+C.x+D.x)/4;
+  const cy = (A.y+B.y+C.y+D.y)/4;
+  const names = ['A','B','C','D'];
+
+  ctx.save();
+  ctx.font = 'italic bold 27px Georgia,"Times New Roman",serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineWidth = 6;
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#fbfdff';
+
+  pts.forEach((p,i) => {
+    let dx = p.x-cx, dy = p.y-cy;
+    const d = Math.hypot(dx,dy) || 1;
+    const lx = p.x + dx/d*33;
+    const ly = p.y + dy/d*33;
+    ctx.strokeText(names[i], lx, ly);
+    ctx.fillStyle = '#1e293b';
+    ctx.fillText(names[i], lx, ly);
+  });
+  ctx.restore();
+}
+
+function measurements(){
+  const [A,B,C,D] = pts;
+  const AB = len(A,B), BC = len(B,C), CD = len(C,D), DA = len(D,A);
+  return { AB,BC,CD,DA };
+}
+
+function update(){
+  const m = measurements();
+
+  const cmAB = toCm(m.AB);
+  const cmCD = toCm(m.CD);
+  const cmBC = toCm(m.BC);
+  const cmDA = toCm(m.DA);
+
+  $('v-ab').textContent = fmtLen(cmAB);
+  $('v-cd').textContent = fmtLen(cmCD);
+  $('v-bc').textContent = fmtLen(cmBC);
+  $('v-ad').textContent = fmtLen(cmDA);
+
+  const len1Equal = (cmAB === cmCD);
+  const len2Equal = (cmBC === cmDA);
+  const allSidesEqual = len1Equal && len2Equal;
+
+  const ps = parallelStatus();
+  const el = $('status');
+
+  if (ps.g1 && ps.g2 && allSidesEqual){
+    el.textContent = '✅ 兩組對邊平行且相等 → 這是平行四邊形！';
+    el.className = 'status ok';
+  } else if (ps.g1 && ps.g2 && !allSidesEqual){
+    const which = [];
+    if (!len1Equal) which.push('藍色對邊（AB 與 CD）');
+    if (!len2Equal) which.push('橙色對邊（BC 與 AD）');
+    el.textContent = '⚠️ ' + which.join('、') + ' 平行，但長度不相等，所以這不是平行四邊形！';
+    el.className = 'status warn';
+  } else {
+    const which = [];
+    if (!ps.g1) which.push('藍色對邊');
+    if (!ps.g2) which.push('橙色對邊');
+    el.textContent = '❌ ' + which.join('、') + ' 不平行 → 這不是平行四邊形';
+    el.className = 'status no';
+  }
+
+  draw();
+}
+
+const HIT = 28;
+
+function toLogical(e){
+  const r = cv.getBoundingClientRect();
+  return {
+    x: (e.clientX - r.left) / r.width  * W,
+    y: (e.clientY - r.top ) / r.height * H
+  };
+}
+
+function pickVertex(p){
+  let best = -1, bestD = HIT;
+  pts.forEach((pt,i) => {
+    const d = Math.hypot(pt.x-p.x, pt.y-p.y);
+    if (d < bestD){ bestD = d; best = i; }
+  });
+  return best;
+}
+
+cv.addEventListener('pointerdown', e => {
+  const p = toLogical(e);
+  const i = pickVertex(p);
+  if (i < 0) return;
+  dragging = i;
+  cv.setPointerCapture(e.pointerId);
+  cv.style.cursor = 'grabbing';
+  e.preventDefault();
+});
+
+cv.addEventListener('pointermove', e => {
+  const p = toLogical(e);
+
+  if (dragging === null){
+    cv.style.cursor = pickVertex(p) >= 0 ? 'grab' : 'default';
+    return;
+  }
+
+  const i = dragging;
+  const snapshot = pts.map(q => ({...q}));
+
+  let targetX = p.x;
+  let targetY = p.y;
+
+  if (opts.snap){
+    targetX = Math.round(targetX / CM) * CM;
+    targetY = Math.round(targetY / CM) * CM;
+  }
+
+  const np = {
+    x: clamp(targetX, PAD, W-PAD),
+    y: clamp(targetY, PAD, H-PAD)
+  };
+  pts[i] = np;
+
+  if (!freeMode){
+    const j = (i + 2) % 4;
+    const a = (i + 1) % 4;
+    const b = (i + 3) % 4;
+    pts[j] = {
+      x: pts[a].x + pts[b].x - np.x,
+      y: pts[a].y + pts[b].y - np.y
+    };
+    if (opts.snap){
+      pts[j].x = Math.round(pts[j].x / CM) * CM;
+      pts[j].y = Math.round(pts[j].y / CM) * CM;
+    }
+  }
+
+  if (polyArea(pts) < 900 || !isConvex(pts[0],pts[1],pts[2],pts[3])) {
+    pts = snapshot;
+  }
+
+  update();
+});
+
+function endDrag(e){
+  if (dragging === null) return;
+  dragging = null;
+  cv.style.cursor = 'default';
+}
+cv.addEventListener('pointerup', endDrag);
+cv.addEventListener('pointercancel', endDrag);
+
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    freeMode = (btn.dataset.mode === 'free');
+
+    if (!freeMode){
+      const [A,B,C] = pts;
+      pts[3] = { x: A.x + C.x - B.x, y: A.y + C.y - B.y };
+      pts[3].x = clamp(pts[3].x, PAD, W-PAD);
+      pts[3].y = clamp(pts[3].y, PAD, H-PAD);
+    }
+    update();
+  });
+});
+
+$('t-grid').addEventListener('change', e => { opts.grid = e.target.checked; draw(); });
+$('t-snap').addEventListener('change', e => { opts.snap = e.target.checked; draw(); });
+$('t-parallel').addEventListener('change', e => { opts.parallel = e.target.checked; draw(); });
+
+$('btn-reset').addEventListener('click', () => {
+  pts = START.map(p => ({...p}));
+  update();
+});
+
+/* ============================================================
+   小測驗：5題（3易2難）
+   困難題：看似平行四邊形但不是，答錯會高亮顯示問題邊
+   ============================================================ */
+const quizCanvas = document.getElementById('quiz-canvas');
+const quizCtx = quizCanvas.getContext('2d');
+const QW = 220, QH = 130;
+
+const quizFigures = [
+  // ===== 3 題簡單 =====
+  { pts: [{x:45,y:95},{x:155,y:95},{x:180,y:40},{x:70,y:40}],
+    answer: true,  name: '平行四邊形', level: 'easy' },
+  { pts: [{x:35,y:95},{x:160,y:95},{x:135,y:40},{x:65,y:40}],
+    answer: false, name: '梯形（上邊明顯比下邊短）', level: 'easy' },
+  { pts: [{x:55,y:95},{x:165,y:95},{x:165,y:40},{x:55,y:40}],
+    answer: true,  name: '長方形',     level: 'easy' },
+
+  // ===== 2 題困難 =====
+  // 困難1：上下邊平行，但左右邊明顯不平行（左緩右陡）
+  //   左邊斜率：-50/30 ≈ -1.67
+  //   右邊斜率：-50/20 = -2.5
+  { pts: [{x:40,y:100},{x:160,y:100},{x:180,y:50},{x:70,y:50}],
+    answer: false, name: '像平行四邊形的梯形（左右邊傾斜度不同）', level: 'hard' },
+
+  // 困難2：上邊明顯向右上傾斜（右端比左端高約13單位），上下不平行
+  { pts: [{x:40,y:100},{x:160,y:100},{x:175,y:42},{x:55,y:55}],
+    answer: false, name: '像平行四邊形的梯形（上邊不是水平）', level: 'hard' }
+];
+
+let quizIndex = 0;
+let quizAnswered = false;
+let quizScore = 0;
+let showAnswerMode = false;  // 是否顯示答案高亮
+
+function quizResize(){
+  const r = quizCanvas.getBoundingClientRect();
+  if (r.width < 10) return;
+  const dpr = window.devicePixelRatio || 1;
+  quizCanvas.width  = Math.round(r.width * dpr);
+  quizCanvas.height = Math.round(r.width * (QH/QW) * dpr);
+  quizCtx.setTransform(quizCanvas.width/QW, 0, 0, quizCanvas.height/QH, 0, 0);
+  drawQuizFigure();
+}
+window.addEventListener('resize', quizResize);
+
+/* 檢查兩條邊是否平行（用叉積 / 長度乘積，正規化為正弦值） */
+function isParallel(p1, p2, p3, p4){
+  const v1x = p2.x-p1.x, v1y = p2.y-p1.y;
+  const v2x = p4.x-p3.x, v2y = p4.y-p3.y;
+  const l1 = Math.hypot(v1x, v1y), l2 = Math.hypot(v2x, v2y);
+  if (l1 < 1 || l2 < 1) return false;
+  const sinAngle = Math.abs(v1x*v2y - v1y*v2x) / (l1*l2);
+  return sinAngle < 0.05;  // 約 3 度以內視為平行
+}
+
+function drawQuizFigure(){
+  if (quizIndex >= quizFigures.length) return;
+  const fig = quizFigures[quizIndex];
+
+  quizCtx.clearRect(0, 0, QW, QH);
+  quizCtx.fillStyle = '#ffffff';
+  quizCtx.fillRect(0, 0, QW, QH);
+
+  // 淺色格線（每20像素一格，幫助觀察）
+  quizCtx.save();
+  quizCtx.strokeStyle = '#f1f5f9';
+  quizCtx.lineWidth = 1;
+  for(let x = 0; x < QW; x += 20){
+    quizCtx.beginPath(); quizCtx.moveTo(x, 0); quizCtx.lineTo(x, QH); quizCtx.stroke();
+  }
+  for(let y = 0; y < QH; y += 20){
+    quizCtx.beginPath(); quizCtx.moveTo(0, y); quizCtx.lineTo(QW, y); quizCtx.stroke();
+  }
+  quizCtx.restore();
+
+  const [A,B,C,D] = fig.pts;
+
+  quizCtx.beginPath();
+  quizCtx.moveTo(A.x,A.y); quizCtx.lineTo(B.x,B.y);
+  quizCtx.lineTo(C.x,C.y); quizCtx.lineTo(D.x,D.y);
+  quizCtx.closePath();
+  quizCtx.fillStyle = 'rgba(59,130,246,0.10)';
+  quizCtx.fill();
+
+  quizCtx.lineWidth = 3.5;
+  quizCtx.lineCap = 'round';
+  quizCtx.lineJoin = 'round';
+
+  // 第一組對邊（藍色）：AB、CD
+  quizCtx.strokeStyle = '#2563eb';
+  quizCtx.beginPath(); quizCtx.moveTo(A.x,A.y); quizCtx.lineTo(B.x,B.y); quizCtx.stroke();
+  quizCtx.beginPath(); quizCtx.moveTo(C.x,C.y); quizCtx.lineTo(D.x,D.y); quizCtx.stroke();
+
+  // 第二組對邊（橙色）：BC、AD
+  quizCtx.strokeStyle = '#f97316';
+  quizCtx.beginPath(); quizCtx.moveTo(B.x,B.y); quizCtx.lineTo(C.x,C.y); quizCtx.stroke();
+  quizCtx.beginPath(); quizCtx.moveTo(D.x,D.y); quizCtx.lineTo(A.x,A.y); quizCtx.stroke();
+
+  // 頂點
+  fig.pts.forEach(p => {
+    quizCtx.beginPath();
+    quizCtx.arc(p.x, p.y, 4.5, 0, Math.PI*2);
+    quizCtx.fillStyle = '#334155';
+    quizCtx.fill();
+  });
+
+  // ★ 答錯時：紅色虛線高亮標示「不平行的對邊」
+  if (showAnswerMode && fig.answer === false){
+    const par1 = isParallel(A, B, D, C);  // AB 與 DC 應該平行
+    const par2 = isParallel(B, C, A, D);  // BC 與 AD 應該平行
+
+    quizCtx.save();
+    quizCtx.strokeStyle = '#dc2626';
+    quizCtx.lineWidth = 5.5;
+    quizCtx.setLineDash([7, 5]);
+    quizCtx.lineCap = 'round';
+
+    if (!par1){
+      // 第一組（藍色對邊）不平行 → 用紅色覆蓋
+      quizCtx.beginPath(); quizCtx.moveTo(A.x,A.y); quizCtx.lineTo(B.x,B.y); quizCtx.stroke();
+      quizCtx.beginPath(); quizCtx.moveTo(C.x,C.y); quizCtx.lineTo(D.x,D.y); quizCtx.stroke();
+    }
+    if (!par2){
+      // 第二組（橙色對邊）不平行 → 用紅色覆蓋
+      quizCtx.beginPath(); quizCtx.moveTo(B.x,B.y); quizCtx.lineTo(C.x,C.y); quizCtx.stroke();
+      quizCtx.beginPath(); quizCtx.moveTo(D.x,D.y); quizCtx.lineTo(A.x,A.y); quizCtx.stroke();
+    }
+    quizCtx.restore();
+
+    // 提示文字
+    quizCtx.save();
+    quizCtx.fillStyle = '#dc2626';
+    quizCtx.font = 'bold 12px system-ui,sans-serif';
+    quizCtx.textAlign = 'center';
+    quizCtx.textBaseline = 'top';
+    let msg = '';
+    if (!par1 && !par2) msg = '紅色虛線這組邊不平行';
+    else if (!par1)     msg = '紅色虛線（藍色對邊）不平行';
+    else                msg = '紅色虛線（橙色對邊）不平行';
+    quizCtx.fillText(msg, QW/2, 5);
+    quizCtx.restore();
+  }
+}
+
+function quizShow(){
+  quizAnswered = false;
+  showAnswerMode = false;
+  const fig = quizFigures[quizIndex];
+
+  $('quiz-progress-text').textContent = `第 ${quizIndex+1} / ${quizFigures.length} 題`;
+  const levelEl = $('quiz-level');
+  if (fig.level === 'easy'){
+    levelEl.textContent = '⭐ 簡單';
+    levelEl.className = 'quiz-level easy';
+    $('quiz-question-text').textContent = '觀察上面的圖形，它是平行四邊形嗎？';
+  } else {
+    levelEl.textContent = '⭐⭐ 困難';
+    levelEl.className = 'quiz-level hard';
+    $('quiz-question-text').textContent = '仔細比較對邊的方向，它是平行四邊形嗎？';
+  }
+
+  $('quiz-fb').textContent = '';
+  $('quiz-fb').className = 'quiz-fb';
+  $('quiz-yes').disabled = false;
+  $('quiz-no').disabled = false;
+
+  // 隱藏「下一題」按鈕（正常顯示答題按鈕）
+  $('quiz-next').style.display = 'none';
+  $('quiz-btns').style.display = 'flex';
+
+  drawQuizFigure();
+}
+
+function quizAnswer(choice){
+  if (quizAnswered) return;
+  quizAnswered = true;
+
+  const fig = quizFigures[quizIndex];
+  const fb = $('quiz-fb');
+
+  if (choice === fig.answer){
+    // ====== 答對 ======
+    quizScore++;
+    fb.textContent = `答對了！這是「${fig.name}」，` +
+      (fig.answer ? '它是平行四邊形 🎉' : '它不是平行四邊形 🎉');
+    fb.className = 'quiz-fb ok';
+    $('quiz-yes').disabled = true;
+    $('quiz-no').disabled = true;
+
+    // 1.5 秒後自動下一題
+    setTimeout(() => goToNextQuestion(), 1500);
+
+  } else {
+    // ====== 答錯 ======
+    fb.textContent = `再想想～ 這是「${fig.name}」，` +
+      (fig.answer ? '它是平行四邊形喔！' : '它不是平行四邊形喔！') +
+      ' 看看畫布上紅色虛線標出的那組邊。';
+    fb.className = 'quiz-fb no';
+
+    // ★ 顯示答案高亮
+    showAnswerMode = true;
+    drawQuizFigure();
+
+    // 隱藏答題按鈕，顯示「下一題」按鈕，讓學生看完再走
+    $('quiz-btns').style.display = 'none';
+    $('quiz-next').style.display = 'block';
+  }
+}
+
+function goToNextQuestion(){
+  $('quiz-next').style.display = 'none';
+  $('quiz-btns').style.display = 'flex';
+  quizIndex++;
+
+  if (quizIndex < quizFigures.length){
+    quizShow();
+  } else {
+    $('quiz-progress-text').textContent = '🎉 全部完成！';
+    $('quiz-level').textContent = '完成';
+    $('quiz-level').className = 'quiz-level easy';
+    $('quiz-question-text').textContent = '小測驗結束';
+    $('quiz-fb').textContent = `你答對了 ${quizScore} / ${quizFigures.length} 題！`;
+    $('quiz-fb').className = 'quiz-fb ok';
+    $('quiz-yes').disabled = true;
+    $('quiz-no').disabled = true;
+    $('quiz-next').style.display = 'none';
+  }
+}
+
+$('quiz-yes').addEventListener('click', () => quizAnswer(true));
+$('quiz-no').addEventListener('click', () => quizAnswer(false));
+$('quiz-next').addEventListener('click', goToNextQuestion);
+
+$('quiz-restart').addEventListener('click', () => {
+  quizIndex = 0;
+  quizScore = 0;
+  showAnswerMode = false;
+  quizShow();
+});
+
+/* ============================================================
+   格子紙畫布
+   ============================================================ */
+const gridCanvas = document.getElementById('grid-canvas');
+const gridCtx = gridCanvas.getContext('2d');
+const GW = 300, GH = 230;
+const GRID = 25;
+
+let gridLines = [];
+let pendingPoint = null;
+
+function gridResize(){
+  const r = gridCanvas.getBoundingClientRect();
+  if (r.width < 10) return;
+  const dpr = window.devicePixelRatio || 1;
+  gridCanvas.width  = Math.round(r.width * dpr);
+  gridCanvas.height = Math.round(r.width * (GH/GW) * dpr);
+  gridCtx.setTransform(gridCanvas.width/GW, 0, 0, gridCanvas.height/GH, 0, 0);
+  drawGrid();
+}
+window.addEventListener('resize', gridResize);
+
+function lineSlope(l){
+  const dx = l.x2 - l.x1;
+  const dy = l.y2 - l.y1;
+  if (Math.abs(dx) < 1) return Infinity;
+  return dy / dx;
+}
+
+function slopesMatch(s1, s2){
+  if (s1 === Infinity && s2 === Infinity) return true;
+  if (s1 === Infinity || s2 === Infinity) return false;
+  return Math.abs(s1 - s2) < 0.15;
+}
+
+function computeLineColors(){
+  const colors = new Array(gridLines.length).fill('#94a3b8');
+  const slopes = gridLines.map(lineSlope);
+  const groups = [];
+  const used = new Array(gridLines.length).fill(false);
+
+  for (let i = 0; i < gridLines.length; i++){
+    if (used[i]) continue;
+    const group = [i];
+    used[i] = true;
+    for (let j = i+1; j < gridLines.length; j++){
+      if (!used[j] && slopesMatch(slopes[i], slopes[j])){
+        group.push(j);
+        used[j] = true;
+      }
+    }
+    groups.push(group);
+  }
+
+  const parallelGroups = groups.filter(g => g.length >= 2);
+  const palette = ['#2563eb', '#f97316', '#8b5cf6', '#10b981'];
+  parallelGroups.forEach((group, idx) => {
+    const color = palette[idx % palette.length];
+    group.forEach(i => colors[i] = color);
+  });
+
+  return colors;
+}
+
+function drawGrid(){
+  gridCtx.clearRect(0, 0, GW, GH);
+  gridCtx.fillStyle = '#ffffff';
+  gridCtx.fillRect(0, 0, GW, GH);
+
+  gridCtx.save();
+  gridCtx.strokeStyle = '#e2e8f0';
+  gridCtx.lineWidth = 1;
+  for(let x = 0; x <= GW; x += GRID){
+    gridCtx.beginPath(); gridCtx.moveTo(x, 0); gridCtx.lineTo(x, GH); gridCtx.stroke();
+  }
+  for(let y = 0; y <= GH; y += GRID){
+    gridCtx.beginPath(); gridCtx.moveTo(0, y); gridCtx.lineTo(GW, y); gridCtx.stroke();
+  }
+  gridCtx.restore();
+
+  const colorMode = $('grid-color').checked;
+  const colors = colorMode ? computeLineColors() : null;
+
+  gridCtx.save();
+  gridCtx.lineWidth = 3.5;
+  gridCtx.lineCap = 'round';
+
+  gridLines.forEach((l, i) => {
+    gridCtx.strokeStyle = colors ? colors[i] : '#2563eb';
+    gridCtx.beginPath();
+    gridCtx.moveTo(l.x1, l.y1);
+    gridCtx.lineTo(l.x2, l.y2);
+    gridCtx.stroke();
+  });
+  gridCtx.restore();
+
+  if (pendingPoint){
+    gridCtx.save();
+    gridCtx.beginPath();
+    gridCtx.arc(pendingPoint.x, pendingPoint.y, 7, 0, Math.PI*2);
+    gridCtx.fillStyle = '#f97316';
+    gridCtx.fill();
+    gridCtx.lineWidth = 2.5;
+    gridCtx.strokeStyle = '#ffffff';
+    gridCtx.stroke();
+    gridCtx.restore();
+  }
+}
+
+function gridToLogical(e){
+  const r = gridCanvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - r.left) / r.width * GW,
+    y: (e.clientY - r.top ) / r.height * GH
+  };
+}
+
+function snapToGrid(v){
+  return Math.round(v / GRID) * GRID;
+}
+
+gridCanvas.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  const p = gridToLogical(e);
+  const sx = snapToGrid(p.x);
+  const sy = snapToGrid(p.y);
+
+  if (!pendingPoint){
+    pendingPoint = { x: sx, y: sy };
+  } else {
+    const start = pendingPoint;
+    const end = { x: sx, y: sy };
+
+    if (Math.abs(start.x - end.x) < 3 && Math.abs(start.y - end.y) < 3){
+      pendingPoint = null;
+      drawGrid();
+      return;
+    }
+
+    const isDup = gridLines.some(l =>
+      (l.x1 === start.x && l.y1 === start.y && l.x2 === end.x && l.y2 === end.y) ||
+      (l.x1 === end.x && l.y1 === end.y && l.x2 === start.x && l.y2 === start.y)
+    );
+    if (!isDup){
+      gridLines.push({ x1: start.x, y1: start.y, x2: end.x, y2: end.y });
+    }
+    pendingPoint = null;
+    updateGridStatus();
+  }
+  drawGrid();
+});
+
+function updateGridStatus(){
+  const status = $('grid-status');
+
+  if (gridLines.length < 4){
+    status.textContent = `已畫 ${gridLines.length} 條線，請繼續畫（至少要4條線）。`;
+    status.className = 'grid-status';
+    return;
+  }
+
+  const slopes = gridLines.map(lineSlope);
+  const groups = [];
+  const used = new Array(gridLines.length).fill(false);
+
+  for (let i = 0; i < gridLines.length; i++){
+    if (used[i]) continue;
+    const group = [i];
+    used[i] = true;
+    for (let j = i+1; j < gridLines.length; j++){
+      if (!used[j] && slopesMatch(slopes[i], slopes[j])){
+        group.push(j);
+        used[j] = true;
+      }
+    }
+    groups.push(group);
+  }
+
+  const parallelGroups = groups.filter(g => g.length >= 2);
+
+  if (parallelGroups.length >= 2){
+    status.textContent = '✅ 太好了！你畫出了兩組平行線，它們圍成了一個平行四邊形！';
+    status.className = 'grid-status';
+  } else if (parallelGroups.length === 1){
+    status.textContent = '⚠️ 目前只有一組平行線，請再畫出另一組平行的線。';
+    status.className = 'grid-status no';
+  } else {
+    status.textContent = '⚠️ 還沒有平行線喔！試試看畫出方向相同的線。';
+    status.className = 'grid-status no';
+  }
+}
+
+$('grid-clear').addEventListener('click', () => {
+  gridLines = [];
+  pendingPoint = null;
+  $('grid-status').textContent = '';
+  drawGrid();
+});
+
+$('grid-color').addEventListener('change', () => {
+  drawGrid();
+});
+
+/* ============================================================
+   啟動
+   ============================================================ */
+resize();
+update();
+
+dResize();
+updateDemoText();
+
+quizResize();
+quizShow();
+
+gridResize();
+
+})();
+</script>
+</body>
+</html>
