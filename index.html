@@ -113,6 +113,32 @@
   .status.no{background:#fef2f2;color:#b91c1c;border:1.5px solid #fecaca;}
   .status.warn{background:#fffbeb;color:#b45309;border:1.5px solid #fde68a;}
 
+  /* 延伸線段提示區 */
+  .extend-tip{
+    display:none;
+    margin-top:10px;font-size:13.5px;font-weight:700;
+    border-radius:10px;padding:10px 14px;
+    line-height:1.8;
+    background:#fef2f2;color:#b91c1c;
+    border:1.5px solid #fecaca;
+  }
+  .extend-tip.show{ display:block; }
+  .extend-tip.all-parallel{
+    background:#f0fdf4;color:#15803d;
+    border-color:#bbf7d0;
+  }
+  .extend-tip .row{
+    display:flex;align-items:center;gap:8px;
+    margin-bottom:4px;
+  }
+  .extend-tip .row:last-child{ margin-bottom:0; }
+  .extend-tip .dot{
+    display:inline-block;width:12px;height:12px;
+    border-radius:50%;flex-shrink:0;
+  }
+  .extend-tip .dot.blue{ background:#2563eb; }
+  .extend-tip .dot.orange{ background:#f97316; }
+
   .toolbar{
     display:flex;flex-wrap:wrap;gap:10px 18px;
     margin-top:14px;align-items:center;
@@ -122,6 +148,19 @@
     font-size:14px;cursor:pointer;user-select:none;color:#334155;
   }
   .sw input{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;}
+
+  /* 延伸線段按鈕（高亮樣式） */
+  .sw.extend{
+    background:#fef3c7;
+    border:2px solid #fcd34d;
+    border-radius:9px;
+    padding:5px 12px;
+    font-weight:700;
+    color:#92400e;
+    transition:.15s;
+  }
+  .sw.extend:hover{ background:#fde68a; }
+  .sw.extend input{ accent-color:#d97706; }
 
   .btn{
     border:none;border-radius:10px;padding:9px 18px;font-size:14px;
@@ -356,18 +395,22 @@
       <canvas id="cv"></canvas>
 
       <div id="status" class="status ok">載入中…</div>
+      <div id="extend-tip" class="extend-tip"></div>
 
       <div class="toolbar">
         <label class="sw"><input type="checkbox" id="t-grid" checked><span>顯示網格</span></label>
         <label class="sw"><input type="checkbox" id="t-snap" checked><span>自動對齊網格（1cm）</span></label>
         <label class="sw"><input type="checkbox" id="t-parallel" checked><span>對邊平行箭頭</span></label>
+
+        <label class="sw extend"><input type="checkbox" id="t-extend"><span>📏 延伸線段</span></label>
+
         <button id="btn-reset" class="btn ghost">重設圖形</button>
       </div>
 
       <div class="hint">
         💡 <span style="color:#2563eb;font-weight:700;">藍色邊</span>是第一組對邊，
         <span style="color:#f97316;font-weight:700;">橙色邊</span>是第二組對邊。
-        試試切到「自由探索模式」，把頂點拖成梯形，看看會發生什麼事！
+        勾選「延伸線段」看看對邊延長後會不會相交！
       </div>
     </div>
 
@@ -468,6 +511,16 @@ const roundRect = (c,x,y,w,h,r) => {
   c.arcTo(x,y,x+w,y,r);
   c.closePath();
 };
+
+/* 兩直線交點：直線 P1-P2 與 P3-P4；平行時回傳 null */
+function lineIntersection(p1, p2, p3, p4){
+  const d1x = p2.x - p1.x, d1y = p2.y - p1.y;
+  const d2x = p4.x - p3.x, d2y = p4.y - p3.y;
+  const denom = d1x * d2y - d1y * d2x;
+  if (Math.abs(denom) < 1e-6) return null;  // 平行（或重疊）
+  const t = ((p3.x - p1.x) * d2y - (p3.y - p1.y) * d2x) / denom;
+  return { x: p1.x + t * d1x, y: p1.y + t * d1y };
+}
 
 /* ============================================================
    畫平行線教室
@@ -885,7 +938,7 @@ let pts = [
 
 const START = pts.map(p => ({...p}));
 
-const opts = { grid:true, snap:true, parallel:true };
+const opts = { grid:true, snap:true, parallel:true, extend:false };
 
 let dragging = null;
 let freeMode = false;
@@ -958,6 +1011,52 @@ function chevronMark(p, q, n, color){
   }
 }
 
+/* 畫無限延伸線（穿過 p 與 q 兩個點） */
+function drawExtendedLine(p, q, color){
+  const dx = q.x - p.x, dy = q.y - p.y;
+  const L = Math.hypot(dx, dy);
+  if (L < 1) return;
+  const ux = dx / L, uy = dy / L;
+  const EXT = 3000;
+
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3;
+  ctx.setLineDash([12, 8]);
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(p.x - ux * EXT, p.y - uy * EXT);
+  ctx.lineTo(q.x + ux * EXT, q.y + uy * EXT);
+  ctx.stroke();
+  ctx.restore();
+}
+
+/* 畫交點（紅色圓點 + 標籤） */
+function drawIntersectionPoint(pt, label){
+  // 只畫在畫布附近（避免畫到無窮遠）
+  if (pt.x < -800 || pt.x > W + 800 || pt.y < -800 || pt.y > H + 800) return;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(pt.x, pt.y, 9, 0, Math.PI*2);
+  ctx.fillStyle = '#dc2626';
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#ffffff';
+  ctx.stroke();
+
+  ctx.font = 'bold 16px system-ui,sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'bottom';
+  ctx.lineWidth = 5;
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#ffffff';
+  ctx.strokeText(label, pt.x + 14, pt.y - 10);
+  ctx.fillStyle = '#dc2626';
+  ctx.fillText(label, pt.x + 14, pt.y - 10);
+  ctx.restore();
+}
+
 function draw(){
   const [A,B,C,D] = pts;
   const ps = parallelStatus();
@@ -977,6 +1076,7 @@ function draw(){
     ctx.restore();
   }
 
+  // 填色
   ctx.beginPath();
   ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y);
   ctx.lineTo(C.x,C.y); ctx.lineTo(D.x,D.y);
@@ -984,6 +1084,25 @@ function draw(){
   ctx.fillStyle = ps.g1 && ps.g2 ? 'rgba(59,130,246,0.08)' : 'rgba(239,68,68,0.08)';
   ctx.fill();
 
+  // ===== 延伸線（在底層） =====
+  let i1 = null, i2 = null;
+  if (opts.extend){
+    // 第一組對邊 AB 與 DC 的延長線（淺藍色虛線）
+    drawExtendedLine(A, B, 'rgba(37,99,235,0.55)');
+    drawExtendedLine(D, C, 'rgba(37,99,235,0.55)');
+    // 第二組對邊 BC 與 AD 的延長線（淺橙色虛線）
+    drawExtendedLine(B, C, 'rgba(249,115,22,0.55)');
+    drawExtendedLine(A, D, 'rgba(249,115,22,0.55)');
+
+    // 計算交點
+    i1 = lineIntersection(A, B, D, C);  // 第一組
+    i2 = lineIntersection(B, C, A, D);  // 第二組
+
+    if (i1) drawIntersectionPoint(i1, '第一組交點');
+    if (i2) drawIntersectionPoint(i2, '第二組交點');
+  }
+
+  // ===== 四條邊 =====
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.lineWidth = 5;
@@ -996,6 +1115,7 @@ function draw(){
   ctx.beginPath(); ctx.moveTo(B.x,B.y); ctx.lineTo(C.x,C.y); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(D.x,D.y); ctx.lineTo(A.x,A.y); ctx.stroke();
 
+  // 平行箭頭
   if (opts.parallel){
     if (ps.g1){
       chevronMark(A, B, 1, COLOR_G1);
@@ -1007,6 +1127,7 @@ function draw(){
     }
   }
 
+  // 頂點
   pts.forEach(p => {
     ctx.beginPath();
     ctx.arc(p.x, p.y, 10, 0, Math.PI*2);
@@ -1017,6 +1138,7 @@ function draw(){
     ctx.stroke();
   });
 
+  // 頂點標籤
   const cx = (A.x+B.x+C.x+D.x)/4;
   const cy = (A.y+B.y+C.y+D.y)/4;
   const names = ['A','B','C','D'];
@@ -1084,7 +1206,50 @@ function update(){
     el.className = 'status no';
   }
 
+  // ===== 延伸線段提示 =====
+  updateExtendTip();
+
   draw();
+}
+
+/* 更新延伸線段的提示區 */
+function updateExtendTip(){
+  const tip = $('extend-tip');
+
+  if (!opts.extend){
+    tip.className = 'extend-tip';
+    tip.style.display = 'none';
+    return;
+  }
+
+  const [A,B,C,D] = pts;
+  const i1 = lineIntersection(A, B, D, C);  // 第一組
+  const i2 = lineIntersection(B, C, A, D);  // 第二組
+
+  let html = '';
+  let allParallel = true;
+
+  if (i1){
+    html += '<div class="row"><span class="dot blue"></span>'
+          + '❌ 藍色對邊（AB、CD）延長後<b>會相交</b> → 不平行</div>';
+    allParallel = false;
+  } else {
+    html += '<div class="row"><span class="dot blue"></span>'
+          + '✅ 藍色對邊（AB、CD）延長後<b>不會相交</b> → 互相平行</div>';
+  }
+
+  if (i2){
+    html += '<div class="row"><span class="dot orange"></span>'
+          + '❌ 橙色對邊（BC、AD）延長後<b>會相交</b> → 不平行</div>';
+    allParallel = false;
+  } else {
+    html += '<div class="row"><span class="dot orange"></span>'
+          + '✅ 橙色對邊（BC、AD）延長後<b>不會相交</b> → 互相平行</div>';
+  }
+
+  tip.innerHTML = html;
+  tip.className = 'extend-tip show' + (allParallel ? ' all-parallel' : '');
+  tip.style.display = 'block';
 }
 
 const HIT = 28;
@@ -1189,6 +1354,10 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
 $('t-grid').addEventListener('change', e => { opts.grid = e.target.checked; draw(); });
 $('t-snap').addEventListener('change', e => { opts.snap = e.target.checked; draw(); });
 $('t-parallel').addEventListener('change', e => { opts.parallel = e.target.checked; draw(); });
+$('t-extend').addEventListener('change', e => {
+  opts.extend = e.target.checked;
+  update();  // 同時更新狀態提示和畫布
+});
 
 $('btn-reset').addEventListener('click', () => {
   pts = START.map(p => ({...p}));
@@ -1197,29 +1366,20 @@ $('btn-reset').addEventListener('click', () => {
 
 /* ============================================================
    小測驗：5題（3易2難）
-   困難題：看似平行四邊形但不是，答錯會高亮顯示問題邊
    ============================================================ */
 const quizCanvas = document.getElementById('quiz-canvas');
 const quizCtx = quizCanvas.getContext('2d');
 const QW = 220, QH = 130;
 
 const quizFigures = [
-  // ===== 3 題簡單 =====
   { pts: [{x:45,y:95},{x:155,y:95},{x:180,y:40},{x:70,y:40}],
     answer: true,  name: '平行四邊形', level: 'easy' },
   { pts: [{x:35,y:95},{x:160,y:95},{x:135,y:40},{x:65,y:40}],
     answer: false, name: '梯形（上邊明顯比下邊短）', level: 'easy' },
   { pts: [{x:55,y:95},{x:165,y:95},{x:165,y:40},{x:55,y:40}],
     answer: true,  name: '長方形',     level: 'easy' },
-
-  // ===== 2 題困難 =====
-  // 困難1：上下邊平行，但左右邊明顯不平行（左緩右陡）
-  //   左邊斜率：-50/30 ≈ -1.67
-  //   右邊斜率：-50/20 = -2.5
   { pts: [{x:40,y:100},{x:160,y:100},{x:180,y:50},{x:70,y:50}],
     answer: false, name: '像平行四邊形的梯形（左右邊傾斜度不同）', level: 'hard' },
-
-  // 困難2：上邊明顯向右上傾斜（右端比左端高約13單位），上下不平行
   { pts: [{x:40,y:100},{x:160,y:100},{x:175,y:42},{x:55,y:55}],
     answer: false, name: '像平行四邊形的梯形（上邊不是水平）', level: 'hard' }
 ];
@@ -1227,7 +1387,7 @@ const quizFigures = [
 let quizIndex = 0;
 let quizAnswered = false;
 let quizScore = 0;
-let showAnswerMode = false;  // 是否顯示答案高亮
+let showAnswerMode = false;
 
 function quizResize(){
   const r = quizCanvas.getBoundingClientRect();
@@ -1240,14 +1400,13 @@ function quizResize(){
 }
 window.addEventListener('resize', quizResize);
 
-/* 檢查兩條邊是否平行（用叉積 / 長度乘積，正規化為正弦值） */
 function isParallel(p1, p2, p3, p4){
   const v1x = p2.x-p1.x, v1y = p2.y-p1.y;
   const v2x = p4.x-p3.x, v2y = p4.y-p3.y;
   const l1 = Math.hypot(v1x, v1y), l2 = Math.hypot(v2x, v2y);
   if (l1 < 1 || l2 < 1) return false;
   const sinAngle = Math.abs(v1x*v2y - v1y*v2x) / (l1*l2);
-  return sinAngle < 0.05;  // 約 3 度以內視為平行
+  return sinAngle < 0.05;
 }
 
 function drawQuizFigure(){
@@ -1258,7 +1417,6 @@ function drawQuizFigure(){
   quizCtx.fillStyle = '#ffffff';
   quizCtx.fillRect(0, 0, QW, QH);
 
-  // 淺色格線（每20像素一格，幫助觀察）
   quizCtx.save();
   quizCtx.strokeStyle = '#f1f5f9';
   quizCtx.lineWidth = 1;
@@ -1283,17 +1441,14 @@ function drawQuizFigure(){
   quizCtx.lineCap = 'round';
   quizCtx.lineJoin = 'round';
 
-  // 第一組對邊（藍色）：AB、CD
   quizCtx.strokeStyle = '#2563eb';
   quizCtx.beginPath(); quizCtx.moveTo(A.x,A.y); quizCtx.lineTo(B.x,B.y); quizCtx.stroke();
   quizCtx.beginPath(); quizCtx.moveTo(C.x,C.y); quizCtx.lineTo(D.x,D.y); quizCtx.stroke();
 
-  // 第二組對邊（橙色）：BC、AD
   quizCtx.strokeStyle = '#f97316';
   quizCtx.beginPath(); quizCtx.moveTo(B.x,B.y); quizCtx.lineTo(C.x,C.y); quizCtx.stroke();
   quizCtx.beginPath(); quizCtx.moveTo(D.x,D.y); quizCtx.lineTo(A.x,A.y); quizCtx.stroke();
 
-  // 頂點
   fig.pts.forEach(p => {
     quizCtx.beginPath();
     quizCtx.arc(p.x, p.y, 4.5, 0, Math.PI*2);
@@ -1301,10 +1456,9 @@ function drawQuizFigure(){
     quizCtx.fill();
   });
 
-  // ★ 答錯時：紅色虛線高亮標示「不平行的對邊」
   if (showAnswerMode && fig.answer === false){
-    const par1 = isParallel(A, B, D, C);  // AB 與 DC 應該平行
-    const par2 = isParallel(B, C, A, D);  // BC 與 AD 應該平行
+    const par1 = isParallel(A, B, D, C);
+    const par2 = isParallel(B, C, A, D);
 
     quizCtx.save();
     quizCtx.strokeStyle = '#dc2626';
@@ -1313,25 +1467,22 @@ function drawQuizFigure(){
     quizCtx.lineCap = 'round';
 
     if (!par1){
-      // 第一組（藍色對邊）不平行 → 用紅色覆蓋
       quizCtx.beginPath(); quizCtx.moveTo(A.x,A.y); quizCtx.lineTo(B.x,B.y); quizCtx.stroke();
       quizCtx.beginPath(); quizCtx.moveTo(C.x,C.y); quizCtx.lineTo(D.x,D.y); quizCtx.stroke();
     }
     if (!par2){
-      // 第二組（橙色對邊）不平行 → 用紅色覆蓋
       quizCtx.beginPath(); quizCtx.moveTo(B.x,B.y); quizCtx.lineTo(C.x,C.y); quizCtx.stroke();
       quizCtx.beginPath(); quizCtx.moveTo(D.x,D.y); quizCtx.lineTo(A.x,A.y); quizCtx.stroke();
     }
     quizCtx.restore();
 
-    // 提示文字
     quizCtx.save();
     quizCtx.fillStyle = '#dc2626';
     quizCtx.font = 'bold 12px system-ui,sans-serif';
     quizCtx.textAlign = 'center';
     quizCtx.textBaseline = 'top';
     let msg = '';
-    if (!par1 && !par2) msg = '紅色虛線這組邊不平行';
+    if (!par1 && !par2) msg = '紅色虛線這兩組邊都不平行';
     else if (!par1)     msg = '紅色虛線（藍色對邊）不平行';
     else                msg = '紅色虛線（橙色對邊）不平行';
     quizCtx.fillText(msg, QW/2, 5);
@@ -1361,7 +1512,6 @@ function quizShow(){
   $('quiz-yes').disabled = false;
   $('quiz-no').disabled = false;
 
-  // 隱藏「下一題」按鈕（正常顯示答題按鈕）
   $('quiz-next').style.display = 'none';
   $('quiz-btns').style.display = 'flex';
 
@@ -1376,29 +1526,22 @@ function quizAnswer(choice){
   const fb = $('quiz-fb');
 
   if (choice === fig.answer){
-    // ====== 答對 ======
     quizScore++;
     fb.textContent = `答對了！這是「${fig.name}」，` +
       (fig.answer ? '它是平行四邊形 🎉' : '它不是平行四邊形 🎉');
     fb.className = 'quiz-fb ok';
     $('quiz-yes').disabled = true;
     $('quiz-no').disabled = true;
-
-    // 1.5 秒後自動下一題
     setTimeout(() => goToNextQuestion(), 1500);
-
   } else {
-    // ====== 答錯 ======
     fb.textContent = `再想想～ 這是「${fig.name}」，` +
       (fig.answer ? '它是平行四邊形喔！' : '它不是平行四邊形喔！') +
       ' 看看畫布上紅色虛線標出的那組邊。';
     fb.className = 'quiz-fb no';
 
-    // ★ 顯示答案高亮
     showAnswerMode = true;
     drawQuizFigure();
 
-    // 隱藏答題按鈕，顯示「下一題」按鈕，讓學生看完再走
     $('quiz-btns').style.display = 'none';
     $('quiz-next').style.display = 'block';
   }
