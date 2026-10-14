@@ -81,6 +81,54 @@
     border:1px solid var(--line);touch-action:none;cursor:default;
   }
 
+  /* ★★★ 延伸線段大按鈕 ★★★ */
+  .extend-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    width:100%;
+    margin-top:14px;
+    padding:14px 20px;
+    font-size:16px;
+    font-weight:800;
+    font-family:inherit;
+    color:#92400e;
+    background:#fef3c7;
+    border:3px dashed #fcd34d;
+    border-radius:14px;
+    cursor:pointer;
+    transition:.18s;
+    letter-spacing:.5px;
+  }
+  .extend-btn:hover{
+    background:#fde68a;
+    border-color:#f59e0b;
+    transform:translateY(-1px);
+  }
+  .extend-btn.active{
+    background:linear-gradient(135deg,#f59e0b,#d97706);
+    color:#fff;
+    border-style:solid;
+    border-color:#b45309;
+    box-shadow:0 4px 14px rgba(245,158,11,.45);
+  }
+  .extend-btn .icon{
+    font-size:20px;
+  }
+  .extend-btn .state{
+    font-size:12px;
+    font-weight:700;
+    padding:2px 9px;
+    border-radius:20px;
+    background:rgba(255,255,255,0.55);
+    color:#92400e;
+  }
+  .extend-btn.active .state{
+    background:rgba(255,255,255,0.25);
+    color:#fff;
+  }
+
   #grid-canvas{
     width:100%;aspect-ratio:300/230;display:block;
     background:#fff;border-radius:9px;
@@ -113,7 +161,6 @@
   .status.no{background:#fef2f2;color:#b91c1c;border:1.5px solid #fecaca;}
   .status.warn{background:#fffbeb;color:#b45309;border:1.5px solid #fde68a;}
 
-  /* 延伸線段提示區 */
   .extend-tip{
     display:none;
     margin-top:10px;font-size:13.5px;font-weight:700;
@@ -148,19 +195,6 @@
     font-size:14px;cursor:pointer;user-select:none;color:#334155;
   }
   .sw input{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;}
-
-  /* 延伸線段按鈕（高亮樣式） */
-  .sw.extend{
-    background:#fef3c7;
-    border:2px solid #fcd34d;
-    border-radius:9px;
-    padding:5px 12px;
-    font-weight:700;
-    color:#92400e;
-    transition:.15s;
-  }
-  .sw.extend:hover{ background:#fde68a; }
-  .sw.extend input{ accent-color:#d97706; }
 
   .btn{
     border:none;border-radius:10px;padding:9px 18px;font-size:14px;
@@ -394,6 +428,13 @@
 
       <canvas id="cv"></canvas>
 
+      <!-- ★★★ 延伸線段：獨立大按鈕 ★★★ -->
+      <button class="extend-btn" id="btn-extend">
+        <span class="icon">📏</span>
+        <span>延伸線段：看看對邊會不會相交</span>
+        <span class="state" id="extend-state">關閉</span>
+      </button>
+
       <div id="status" class="status ok">載入中…</div>
       <div id="extend-tip" class="extend-tip"></div>
 
@@ -401,16 +442,13 @@
         <label class="sw"><input type="checkbox" id="t-grid" checked><span>顯示網格</span></label>
         <label class="sw"><input type="checkbox" id="t-snap" checked><span>自動對齊網格（1cm）</span></label>
         <label class="sw"><input type="checkbox" id="t-parallel" checked><span>對邊平行箭頭</span></label>
-
-        <label class="sw extend"><input type="checkbox" id="t-extend"><span>📏 延伸線段</span></label>
-
         <button id="btn-reset" class="btn ghost">重設圖形</button>
       </div>
 
       <div class="hint">
         💡 <span style="color:#2563eb;font-weight:700;">藍色邊</span>是第一組對邊，
         <span style="color:#f97316;font-weight:700;">橙色邊</span>是第二組對邊。
-        勾選「延伸線段」看看對邊延長後會不會相交！
+        按黃色按鈕「延伸線段」，看看對邊延長後會不會相交！
       </div>
     </div>
 
@@ -512,12 +550,11 @@ const roundRect = (c,x,y,w,h,r) => {
   c.closePath();
 };
 
-/* 兩直線交點：直線 P1-P2 與 P3-P4；平行時回傳 null */
 function lineIntersection(p1, p2, p3, p4){
   const d1x = p2.x - p1.x, d1y = p2.y - p1.y;
   const d2x = p4.x - p3.x, d2y = p4.y - p3.y;
   const denom = d1x * d2y - d1y * d2x;
-  if (Math.abs(denom) < 1e-6) return null;  // 平行（或重疊）
+  if (Math.abs(denom) < 1e-6) return null;
   const t = ((p3.x - p1.x) * d2y - (p3.y - p1.y) * d2x) / denom;
   return { x: p1.x + t * d1x, y: p1.y + t * d1y };
 }
@@ -1011,7 +1048,6 @@ function chevronMark(p, q, n, color){
   }
 }
 
-/* 畫無限延伸線（穿過 p 與 q 兩個點） */
 function drawExtendedLine(p, q, color){
   const dx = q.x - p.x, dy = q.y - p.y;
   const L = Math.hypot(dx, dy);
@@ -1031,9 +1067,7 @@ function drawExtendedLine(p, q, color){
   ctx.restore();
 }
 
-/* 畫交點（紅色圓點 + 標籤） */
 function drawIntersectionPoint(pt, label){
-  // 只畫在畫布附近（避免畫到無窮遠）
   if (pt.x < -800 || pt.x > W + 800 || pt.y < -800 || pt.y > H + 800) return;
 
   ctx.save();
@@ -1076,7 +1110,6 @@ function draw(){
     ctx.restore();
   }
 
-  // 填色
   ctx.beginPath();
   ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y);
   ctx.lineTo(C.x,C.y); ctx.lineTo(D.x,D.y);
@@ -1084,25 +1117,22 @@ function draw(){
   ctx.fillStyle = ps.g1 && ps.g2 ? 'rgba(59,130,246,0.08)' : 'rgba(239,68,68,0.08)';
   ctx.fill();
 
-  // ===== 延伸線（在底層） =====
+  // 延伸線（底層）
   let i1 = null, i2 = null;
   if (opts.extend){
-    // 第一組對邊 AB 與 DC 的延長線（淺藍色虛線）
     drawExtendedLine(A, B, 'rgba(37,99,235,0.55)');
     drawExtendedLine(D, C, 'rgba(37,99,235,0.55)');
-    // 第二組對邊 BC 與 AD 的延長線（淺橙色虛線）
     drawExtendedLine(B, C, 'rgba(249,115,22,0.55)');
     drawExtendedLine(A, D, 'rgba(249,115,22,0.55)');
 
-    // 計算交點
-    i1 = lineIntersection(A, B, D, C);  // 第一組
-    i2 = lineIntersection(B, C, A, D);  // 第二組
+    i1 = lineIntersection(A, B, D, C);
+    i2 = lineIntersection(B, C, A, D);
 
     if (i1) drawIntersectionPoint(i1, '第一組交點');
     if (i2) drawIntersectionPoint(i2, '第二組交點');
   }
 
-  // ===== 四條邊 =====
+  // 四條邊
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.lineWidth = 5;
@@ -1115,7 +1145,6 @@ function draw(){
   ctx.beginPath(); ctx.moveTo(B.x,B.y); ctx.lineTo(C.x,C.y); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(D.x,D.y); ctx.lineTo(A.x,A.y); ctx.stroke();
 
-  // 平行箭頭
   if (opts.parallel){
     if (ps.g1){
       chevronMark(A, B, 1, COLOR_G1);
@@ -1127,7 +1156,6 @@ function draw(){
     }
   }
 
-  // 頂點
   pts.forEach(p => {
     ctx.beginPath();
     ctx.arc(p.x, p.y, 10, 0, Math.PI*2);
@@ -1138,7 +1166,6 @@ function draw(){
     ctx.stroke();
   });
 
-  // 頂點標籤
   const cx = (A.x+B.x+C.x+D.x)/4;
   const cy = (A.y+B.y+C.y+D.y)/4;
   const names = ['A','B','C','D'];
@@ -1206,25 +1233,26 @@ function update(){
     el.className = 'status no';
   }
 
-  // ===== 延伸線段提示 =====
   updateExtendTip();
-
   draw();
 }
 
-/* 更新延伸線段的提示區 */
 function updateExtendTip(){
   const tip = $('extend-tip');
+  const stateEl = $('extend-state');
 
   if (!opts.extend){
     tip.className = 'extend-tip';
     tip.style.display = 'none';
+    stateEl.textContent = '關閉';
     return;
   }
 
+  stateEl.textContent = '開啟';
+
   const [A,B,C,D] = pts;
-  const i1 = lineIntersection(A, B, D, C);  // 第一組
-  const i2 = lineIntersection(B, C, A, D);  // 第二組
+  const i1 = lineIntersection(A, B, D, C);
+  const i2 = lineIntersection(B, C, A, D);
 
   let html = '';
   let allParallel = true;
@@ -1354,9 +1382,12 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
 $('t-grid').addEventListener('change', e => { opts.grid = e.target.checked; draw(); });
 $('t-snap').addEventListener('change', e => { opts.snap = e.target.checked; draw(); });
 $('t-parallel').addEventListener('change', e => { opts.parallel = e.target.checked; draw(); });
-$('t-extend').addEventListener('change', e => {
-  opts.extend = e.target.checked;
-  update();  // 同時更新狀態提示和畫布
+
+/* ★★★ 延伸線段大按鈕 ★★★ */
+$('btn-extend').addEventListener('click', () => {
+  opts.extend = !opts.extend;
+  $('btn-extend').classList.toggle('active', opts.extend);
+  update();
 });
 
 $('btn-reset').addEventListener('click', () => {
