@@ -81,7 +81,6 @@
     border:1px solid var(--line);touch-action:none;cursor:default;
   }
 
-  /* ★★★ 延伸線段大按鈕 ★★★ */
   .extend-btn{
     display:flex;
     align-items:center;
@@ -113,9 +112,7 @@
     border-color:#b45309;
     box-shadow:0 4px 14px rgba(245,158,11,.45);
   }
-  .extend-btn .icon{
-    font-size:20px;
-  }
+  .extend-btn .icon{ font-size:20px; }
   .extend-btn .state{
     font-size:12px;
     font-weight:700;
@@ -428,7 +425,6 @@
 
       <canvas id="cv"></canvas>
 
-      <!-- ★★★ 延伸線段：獨立大按鈕 ★★★ -->
       <button class="extend-btn" id="btn-extend">
         <span class="icon">📏</span>
         <span>延伸線段：看看對邊會不會相交</span>
@@ -503,7 +499,7 @@
       <canvas id="grid-canvas"></canvas>
       <p class="grid-hint">
         點一下格子交叉點作為起點，再點另一個點畫線。<br>
-        試著畫出2組平行線，看看能否圍成平行四邊形！
+        畫出4條線（2組平行線），讓它們<strong>交叉圍成一個平行四邊形</strong>！
       </p>
 
       <label class="color-toggle">
@@ -557,6 +553,23 @@ function lineIntersection(p1, p2, p3, p4){
   if (Math.abs(denom) < 1e-6) return null;
   const t = ((p3.x - p1.x) * d2y - (p3.y - p1.y) * d2x) / denom;
   return { x: p1.x + t * d1x, y: p1.y + t * d1y };
+}
+
+/* 判斷兩條線段是否真的相交（線段本身的範圍內） */
+function crossPoint(A, B, C){
+  return (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
+}
+function segmentsIntersect(L1, L2){
+  const A = {x: L1.x1, y: L1.y1};
+  const B = {x: L1.x2, y: L1.y2};
+  const C = {x: L2.x1, y: L2.y1};
+  const D = {x: L2.x2, y: L2.y2};
+  const c1 = crossPoint(C, D, A);
+  const c2 = crossPoint(C, D, B);
+  const c3 = crossPoint(A, B, C);
+  const c4 = crossPoint(A, B, D);
+  return ((c1 > 0 && c2 < 0) || (c1 < 0 && c2 > 0)) &&
+         ((c3 > 0 && c4 < 0) || (c3 < 0 && c4 > 0));
 }
 
 /* ============================================================
@@ -1117,7 +1130,6 @@ function draw(){
   ctx.fillStyle = ps.g1 && ps.g2 ? 'rgba(59,130,246,0.08)' : 'rgba(239,68,68,0.08)';
   ctx.fill();
 
-  // 延伸線（底層）
   let i1 = null, i2 = null;
   if (opts.extend){
     drawExtendedLine(A, B, 'rgba(37,99,235,0.55)');
@@ -1132,7 +1144,6 @@ function draw(){
     if (i2) drawIntersectionPoint(i2, '第二組交點');
   }
 
-  // 四條邊
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.lineWidth = 5;
@@ -1383,7 +1394,6 @@ $('t-grid').addEventListener('change', e => { opts.grid = e.target.checked; draw
 $('t-snap').addEventListener('change', e => { opts.snap = e.target.checked; draw(); });
 $('t-parallel').addEventListener('change', e => { opts.parallel = e.target.checked; draw(); });
 
-/* ★★★ 延伸線段大按鈕 ★★★ */
 $('btn-extend').addEventListener('click', () => {
   opts.extend = !opts.extend;
   $('btn-extend').classList.toggle('active', opts.extend);
@@ -1761,6 +1771,7 @@ gridCanvas.addEventListener('pointerdown', e => {
   drawGrid();
 });
 
+/* ★★★ 修改：檢查線段是否真的圍成平行四邊形 ★★★ */
 function updateGridStatus(){
   const status = $('grid-status');
 
@@ -1770,6 +1781,7 @@ function updateGridStatus(){
     return;
   }
 
+  // 按斜率分組
   const slopes = gridLines.map(lineSlope);
   const groups = [];
   const used = new Array(gridLines.length).fill(false);
@@ -1787,16 +1799,57 @@ function updateGridStatus(){
     groups.push(group);
   }
 
+  // 找出至少有 2 條線的平行組
   const parallelGroups = groups.filter(g => g.length >= 2);
 
-  if (parallelGroups.length >= 2){
-    status.textContent = '✅ 太好了！你畫出了兩組平行線，它們圍成了一個平行四邊形！';
-    status.className = 'grid-status';
-  } else if (parallelGroups.length === 1){
-    status.textContent = '⚠️ 目前只有一組平行線，請再畫出另一組平行的線。';
+  if (parallelGroups.length < 2){
+    if (parallelGroups.length === 1){
+      status.textContent = '⚠️ 目前只有一組平行線，請再畫出另一組方向不同的平行線。';
+    } else {
+      status.textContent = '⚠️ 還沒有平行線喔！試試看畫出方向相同的線。';
+    }
     status.className = 'grid-status no';
+    return;
+  }
+
+  // ★ 關鍵檢查：兩組平行線的線段必須真的交叉，才能圍成四邊形
+  let foundQuad = false;
+
+  for (let g1 = 0; g1 < parallelGroups.length && !foundQuad; g1++){
+    for (let g2 = g1+1; g2 < parallelGroups.length && !foundQuad; g2++){
+      const A = parallelGroups[g1];
+      const B = parallelGroups[g2];
+
+      // 嘗試所有「從 A 取 2 條、從 B 取 2 條」的組合
+      for (let i1 = 0; i1 < A.length && !foundQuad; i1++){
+        for (let i2 = i1+1; i2 < A.length && !foundQuad; i2++){
+          for (let j1 = 0; j1 < B.length && !foundQuad; j1++){
+            for (let j2 = j1+1; j2 < B.length && !foundQuad; j2++){
+              const L1 = gridLines[A[i1]];
+              const L2 = gridLines[A[i2]];
+              const M1 = gridLines[B[j1]];
+              const M2 = gridLines[B[j2]];
+
+              // 檢查 4 對線段是否都真的相交
+              const ok =
+                segmentsIntersect(L1, M1) &&
+                segmentsIntersect(L1, M2) &&
+                segmentsIntersect(L2, M1) &&
+                segmentsIntersect(L2, M2);
+
+              if (ok) foundQuad = true;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (foundQuad){
+    status.textContent = '✅ 太好了！你的 4 條線真的交叉圍成了一個平行四邊形！';
+    status.className = 'grid-status';
   } else {
-    status.textContent = '⚠️ 還沒有平行線喔！試試看畫出方向相同的線。';
+    status.textContent = '⚠️ 你畫了兩組平行線，但線段沒有真的交叉圍成四邊形。試試讓線段交叉！';
     status.className = 'grid-status no';
   }
 }
