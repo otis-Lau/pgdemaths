@@ -62,7 +62,7 @@
 
   .drawer-layout{
     display:grid;
-    grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr);
+    grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);
     gap:20px;align-items:start;
   }
   @media(max-width:900px){ .drawer-layout{grid-template-columns:1fr;} }
@@ -82,49 +82,25 @@
   }
 
   .extend-btn{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    width:100%;
-    margin-top:14px;
-    padding:14px 20px;
-    font-size:16px;
-    font-weight:800;
-    font-family:inherit;
-    color:#92400e;
-    background:#fef3c7;
-    border:3px dashed #fcd34d;
-    border-radius:14px;
-    cursor:pointer;
-    transition:.18s;
-    letter-spacing:.5px;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    width:100%;margin-top:14px;padding:14px 20px;
+    font-size:16px;font-weight:800;font-family:inherit;
+    color:#92400e;background:#fef3c7;
+    border:3px dashed #fcd34d;border-radius:14px;
+    cursor:pointer;transition:.18s;letter-spacing:.5px;
   }
-  .extend-btn:hover{
-    background:#fde68a;
-    border-color:#f59e0b;
-    transform:translateY(-1px);
-  }
+  .extend-btn:hover{background:#fde68a;border-color:#f59e0b;transform:translateY(-1px);}
   .extend-btn.active{
     background:linear-gradient(135deg,#f59e0b,#d97706);
-    color:#fff;
-    border-style:solid;
-    border-color:#b45309;
+    color:#fff;border-style:solid;border-color:#b45309;
     box-shadow:0 4px 14px rgba(245,158,11,.45);
   }
   .extend-btn .icon{ font-size:20px; }
   .extend-btn .state{
-    font-size:12px;
-    font-weight:700;
-    padding:2px 9px;
-    border-radius:20px;
-    background:rgba(255,255,255,0.55);
-    color:#92400e;
+    font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px;
+    background:rgba(255,255,255,0.55);color:#92400e;
   }
-  .extend-btn.active .state{
-    background:rgba(255,255,255,0.25);
-    color:#fff;
-  }
+  .extend-btn.active .state{background:rgba(255,255,255,0.25);color:#fff;}
 
   #grid-canvas{
     width:100%;aspect-ratio:300/230;display:block;
@@ -159,27 +135,15 @@
   .status.warn{background:#fffbeb;color:#b45309;border:1.5px solid #fde68a;}
 
   .extend-tip{
-    display:none;
-    margin-top:10px;font-size:13.5px;font-weight:700;
-    border-radius:10px;padding:10px 14px;
-    line-height:1.8;
-    background:#fef2f2;color:#b91c1c;
-    border:1.5px solid #fecaca;
+    display:none;margin-top:10px;font-size:13.5px;font-weight:700;
+    border-radius:10px;padding:10px 14px;line-height:1.8;
+    background:#fef2f2;color:#b91c1c;border:1.5px solid #fecaca;
   }
   .extend-tip.show{ display:block; }
-  .extend-tip.all-parallel{
-    background:#f0fdf4;color:#15803d;
-    border-color:#bbf7d0;
-  }
-  .extend-tip .row{
-    display:flex;align-items:center;gap:8px;
-    margin-bottom:4px;
-  }
+  .extend-tip.all-parallel{background:#f0fdf4;color:#15803d;border-color:#bbf7d0;}
+  .extend-tip .row{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
   .extend-tip .row:last-child{ margin-bottom:0; }
-  .extend-tip .dot{
-    display:inline-block;width:12px;height:12px;
-    border-radius:50%;flex-shrink:0;
-  }
+  .extend-tip .dot{display:inline-block;width:12px;height:12px;border-radius:50%;flex-shrink:0;}
   .extend-tip .dot.blue{ background:#2563eb; }
   .extend-tip .dot.orange{ background:#f97316; }
 
@@ -209,10 +173,7 @@
     padding:8px 12px;margin-top:12px;line-height:1.65;
   }
 
-  .sub{
-    font-size:12.5px;font-weight:700;color:var(--muted);
-    letter-spacing:1px;margin:14px 0 8px;
-  }
+  .sub{font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:1px;margin:14px 0 8px;}
   .sub:first-of-type{margin-top:0;}
   .sub.blue{color:var(--blue);}
   .sub.orange{color:var(--orange);}
@@ -233,10 +194,7 @@
     justify-content:space-between;align-items:center;gap:8px;
   }
   .sumline b{font-variant-numeric:tabular-nums;color:#047857;font-size:15px;}
-  .chip{
-    font-size:12px;font-weight:700;color:#047857;
-    background:#dcfce7;border-radius:20px;padding:3px 10px;
-  }
+  .chip{font-size:12px;font-weight:700;color:#047857;background:#dcfce7;border-radius:20px;padding:3px 10px;}
 
   .props{margin:0;padding-left:20px;font-size:14px;line-height:2;color:#334155;}
   .props li::marker{color:var(--blue);}
@@ -247,15 +205,9 @@
   .discovery ol{margin:6px 0 0;padding-left:20px;}
   .discovery li{margin-bottom:4px;}
   .discovery li::marker{color:var(--green);font-weight:700;}
-  .discovery .highlight{
-    background:#dcfce7;border-radius:6px;padding:2px 7px;
-    font-weight:700;color:#15803d;
-  }
+  .discovery .highlight{background:#dcfce7;border-radius:6px;padding:2px 7px;font-weight:700;color:#15803d;}
 
-  .edge-picker{
-    margin-bottom:12px;display:flex;gap:8px;
-    align-items:center;flex-wrap:wrap;
-  }
+  .edge-picker{margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
   .edge-label{font-size:14px;font-weight:700;color:#475569;}
   .edge-btn{
     border:2px solid var(--line);background:#fff;color:#475569;
@@ -277,16 +229,44 @@
     background:#eff6ff;border-radius:10px;padding:11px 14px;
     line-height:1.55;min-height:64px;
   }
-  .demo-controls{
-    display:flex;gap:8px;align-items:center;flex-wrap:wrap;
-  }
+  .demo-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
   .demo-controls .btn{padding:8px 14px;font-size:13.5px;}
 
+  /* ★★★ 鬆開直尺按鈕 ★★★ */
+  #d-release{
+    background:#fef3c7 !important;
+    color:#92400e !important;
+    border:2.5px solid #fcd34d !important;
+    font-weight:800 !important;
+    padding:8px 16px !important;
+    font-size:13.5px !important;
+    transition:.15s !important;
+  }
+  #d-release:hover{ background:#fde68a !important; border-color:#f59e0b !important; }
+  #d-release.active{
+    background:linear-gradient(135deg,#f59e0b,#d97706) !important;
+    color:#fff !important;
+    border-color:#b45309 !important;
+    box-shadow:0 3px 10px rgba(245,158,11,.4) !important;
+  }
+
+  #rotate-controls{
+    display:none;gap:6px;align-items:center;
+    background:#eff6ff;border-radius:10px;padding:4px 8px;
+    border:1.5px solid #bfdbfe;
+  }
+  #rotate-controls.show{ display:flex; }
+  #rotate-controls .rlabel{
+    font-size:12px;font-weight:700;color:#1e40af;margin-right:2px;
+  }
+  #rotate-controls button{
+    padding:6px 12px !important;
+    font-size:13px !important;
+  }
+
   .discovery-box{
-    background:#f0fdf4;
-    border:1.5px solid #bbf7d0;
-    border-radius:12px;
-    padding:12px 14px;
+    background:#f0fdf4;border:1.5px solid #bbf7d0;
+    border-radius:12px;padding:12px 14px;
   }
   .discovery-box .dt{
     font-size:13px;font-weight:800;color:#15803d;
@@ -294,54 +274,32 @@
     display:flex;align-items:center;gap:6px;
   }
 
-  .quiz-box{
-    background:#f8fafc;border-radius:12px;padding:14px;margin-bottom:14px;
-  }
+  .quiz-box{background:#f8fafc;border-radius:12px;padding:14px;margin-bottom:14px;}
   .quiz-progress{
     display:flex;justify-content:space-between;align-items:center;
-    font-size:12.5px;font-weight:700;color:var(--muted);
-    margin-bottom:10px;
+    font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:10px;
   }
-  .quiz-level{
-    font-size:11.5px;font-weight:700;border-radius:20px;
-    padding:2px 10px;
-  }
+  .quiz-level{font-size:11.5px;font-weight:700;border-radius:20px;padding:2px 10px;}
   .quiz-level.easy{background:#dcfce7;color:#15803d;}
   .quiz-level.hard{background:#fee2e2;color:#b91c1c;}
-  .quiz-question{
-    font-size:14.5px;font-weight:700;color:#1e293b;margin:0 0 12px;
-  }
+  .quiz-question{font-size:14.5px;font-weight:700;color:#1e293b;margin:0 0 12px;}
   .quiz-btns{display:flex;gap:8px;}
   .btn-yes,.btn-no{
     flex:1;border:none;border-radius:10px;padding:11px;
-    font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;
-    transition:.15s;
+    font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;
   }
   .btn-yes{background:#dcfce7;color:#15803d;}
   .btn-yes:hover{background:#bbf7d0;}
   .btn-no{background:#fee2e2;color:#b91c1c;}
   .btn-no:hover{background:#fecaca;}
-  .quiz-fb{
-    margin-top:11px;font-size:14px;font-weight:600;line-height:1.6;
-    min-height:22px;
-  }
+  .quiz-fb{margin-top:11px;font-size:14px;font-weight:600;line-height:1.6;min-height:22px;}
   .quiz-fb.ok{color:#059669;}
   .quiz-fb.no{color:#dc2626;}
 
-  #quiz-next{
-    display:none;
-    width:100%;margin-top:12px;
-    padding:11px;font-size:14.5px;
-  }
+  #quiz-next{display:none;width:100%;margin-top:12px;padding:11px;font-size:14.5px;}
 
-  .grid-hint{
-    font-size:12.5px;color:var(--muted);margin:9px 0;
-    line-height:1.6;
-  }
-  .grid-controls{
-    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
-    margin-top:10px;
-  }
+  .grid-hint{font-size:12.5px;color:var(--muted);margin:9px 0;line-height:1.6;}
+  .grid-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;}
   .grid-status{
     font-size:13.5px;font-weight:700;color:#15803d;
     margin-top:8px;min-height:18px;line-height:1.5;
@@ -356,9 +314,7 @@
     border:1.5px solid #bae6fd;transition:.15s;
   }
   .color-toggle:hover{background:#e0f2fe;}
-  .color-toggle input{
-    width:17px;height:17px;accent-color:#0284c7;cursor:pointer;
-  }
+  .color-toggle input{width:17px;height:17px;accent-color:#0284c7;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -393,6 +349,16 @@
           <button class="btn ghost" id="d-reset-tri">重置三角尺</button>
         </div>
 
+        <!-- ★★★ 鬆開直尺 + 旋轉控制 ★★★ -->
+        <div class="demo-controls">
+          <button class="btn" id="d-release">🔓 鬆開直尺</button>
+          <div id="rotate-controls">
+            <span class="rlabel">旋轉</span>
+            <button class="btn ghost" id="d-rotate-l">↺ 左轉</button>
+            <button class="btn ghost" id="d-rotate-r">右轉 ↻</button>
+          </div>
+        </div>
+
         <div class="discovery-box">
           <div class="dt">💡 小發現</div>
           <div class="discovery">
@@ -407,6 +373,9 @@
               因為三角尺移動時方向沒有改變，所以畫出來的兩條線
               <span class="highlight">永遠不會相交</span>，也就是
               <span class="highlight">互相平行</span>！
+            </p>
+            <p style="margin:8px 0 0;color:#b45309;font-weight:700;">
+              ⚡ 試試按「鬆開直尺」，把三角尺轉個角度再畫一次，看看還會不會平行？
             </p>
           </div>
         </div>
@@ -556,7 +525,7 @@ function lineIntersection(p1, p2, p3, p4){
 }
 
 /* ============================================================
-   畫平行線教室
+   畫平行線教室（含鬆開直尺功能）
    ============================================================ */
 const dcv  = document.getElementById('dcv');
 const dctx = dcv.getContext('2d');
@@ -565,25 +534,40 @@ const DW = 520, DH = 360;
 const RULER = { x: 25, y: 290, w: 470, h: 42 };
 const tri = { x: 200, y: RULER.y, size: 100 };
 
-let drawnLines = [];
+let drawnLines = [];       // 每條線：{type, x1, y1, x2, y2, srcX, srcY, angle}
 let drawMode = 'vertical';
 let draggingTri = false;
-let dragOffsetX = 0;
+let dragOffsetX = 0, dragOffsetY = 0;
+
+let rulerLocked = true;    // ★ 直尺是否扣住三角尺
+let triAngle = 0;          // ★ 三角尺旋轉角度（弧度）
 
 const DRAW_TOP = 20;
 const DRAW_BOTTOM = RULER.y;
 
+/* 三角尺的三個點（直角、右下、左上） */
+function getTriPoints(x, y, angle, s){
+  s = s || tri.size;
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  return {
+    corner: { x: x,          y: y          },
+    right:  { x: x + s*cos,  y: y + s*sin  },
+    up:     { x: x + s*sin,  y: y - s*cos  }
+  };
+}
+
 function sign(p1, p2, p3){
   return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
 }
+
+/* 判斷點是否在旋轉後的三角形內 */
 function pointInTriangle(px, py){
-  const p  = {x: px, y: py};
-  const p1 = {x: tri.x, y: tri.y};
-  const p2 = {x: tri.x + tri.size, y: tri.y};
-  const p3 = {x: tri.x, y: tri.y - tri.size};
-  const d1 = sign(p, p1, p2);
-  const d2 = sign(p, p2, p3);
-  const d3 = sign(p, p3, p1);
+  const p = {x: px, y: py};
+  const t = getTriPoints(tri.x, tri.y, triAngle);
+  const d1 = sign(p, t.corner, t.right);
+  const d2 = sign(p, t.right,  t.up);
+  const d3 = sign(p, t.up,     t.corner);
   const hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
   const hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
   return !(hasNeg && hasPos);
@@ -597,23 +581,112 @@ function dToLogical(e){
   };
 }
 
-function hypotenusePoints(pos){
-  const baseY = tri.y - tri.size;
-  const t0 = -500;
-  const t1 =  700;
+/* 從三角尺的邊取延長後的線段（相對於畫布） */
+function getExtendedSegment(type, x, y, angle){
+  const t = getTriPoints(x, y, angle);
+  let a, b;
+  if (type === 'v') { a = t.corner; b = t.up; }
+  else              { a = t.right;  b = t.up; }
+
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const L = Math.hypot(dx, dy);
+  if (L < 1) return null;
+  const ux = dx / L, uy = dy / L;
+  const EXT = 2000;
+
   return {
-    x0: pos + t0, y0: baseY + t0,
-    x1: pos + t1, y1: baseY + t1
+    x1: a.x - ux * EXT, y1: a.y - uy * EXT,
+    x2: b.x + ux * EXT, y2: b.y + uy * EXT
   };
 }
 
+/* 計算線段斜率 */
+function lineSlope(l){
+  const dx = l.x2 - l.x1;
+  const dy = l.y2 - l.y1;
+  if (Math.abs(dx) < 1e-3) return Infinity;
+  return dy / dx;
+}
+
+function slopesMatch(s1, s2){
+  if (s1 === Infinity && s2 === Infinity) return true;
+  if (s1 === Infinity || s2 === Infinity) return false;
+  return Math.abs(s1 - s2) < 0.08;
+}
+
+/* 把已畫的線按斜率分組 */
+function groupLinesBySlope(){
+  const slopes = drawnLines.map(lineSlope);
+  const groups = [];
+  const used = new Array(drawnLines.length).fill(false);
+
+  for (let i = 0; i < drawnLines.length; i++){
+    if (used[i]) continue;
+    const group = [i];
+    used[i] = true;
+    for (let j = i+1; j < drawnLines.length; j++){
+      if (!used[j] && slopesMatch(slopes[i], slopes[j])){
+        group.push(j);
+        used[j] = true;
+      }
+    }
+    groups.push(group);
+  }
+  return groups;
+}
+
+/* 從兩組平行線中找出圍成的平行四邊形 */
+function findParallelogram(){
+  const groups = groupLinesBySlope();
+  const parallelGroups = groups.filter(g => g.length >= 2);
+
+  if (parallelGroups.length < 2) return null;
+
+  for (let g1 = 0; g1 < parallelGroups.length; g1++){
+    for (let g2 = g1+1; g2 < parallelGroups.length; g2++){
+      const A = parallelGroups[g1], B = parallelGroups[g2];
+      if (A.length < 2 || B.length < 2) continue;
+
+      // 取前兩條
+      const L1 = drawnLines[A[0]], L2 = drawnLines[A[1]];
+      const M1 = drawnLines[B[0]], M2 = drawnLines[B[1]];
+
+      const P1 = lineIntersection(
+        {x: L1.x1, y: L1.y1}, {x: L1.x2, y: L1.y2},
+        {x: M1.x1, y: M1.y1}, {x: M1.x2, y: M1.y2});
+      const P2 = lineIntersection(
+        {x: L2.x1, y: L2.y1}, {x: L2.x2, y: L2.y2},
+        {x: M1.x1, y: M1.y1}, {x: M1.x2, y: M1.y2});
+      const P3 = lineIntersection(
+        {x: L2.x1, y: L2.y1}, {x: L2.x2, y: L2.y2},
+        {x: M2.x1, y: M2.y1}, {x: M2.x2, y: M2.y2});
+      const P4 = lineIntersection(
+        {x: L1.x1, y: L1.y1}, {x: L1.x2, y: L1.y2},
+        {x: M2.x1, y: M2.y1}, {x: M2.x2, y: M2.y2});
+
+      if (P1 && P2 && P3 && P4){
+        // 簡單檢查：四點不能太近（避免退化）
+        const ok = [P1, P2, P3, P4].every((p, i) => {
+          const q = [P1, P2, P3, P4][(i+1) % 4];
+          return Math.hypot(p.x - q.x, p.y - q.y) > 10;
+        });
+        if (ok) return [P1, P2, P3, P4];
+      }
+    }
+  }
+  return null;
+}
+
 function getDrawState(){
-  const vLines = drawnLines.filter(l => l.type === 'v').map(l => l.pos);
-  const hLines = drawnLines.filter(l => l.type === 'h').map(l => l.pos);
-  const vCount = vLines.length;
-  const hCount = hLines.length;
-  const isParallelogram = (vCount >= 2 && hCount >= 2);
-  return { vCount, hCount, isParallelogram };
+  const groups = groupLinesBySlope();
+  const parallelGroups = groups.filter(g => g.length >= 2);
+  const para = findParallelogram();
+
+  return {
+    lineCount: drawnLines.length,
+    parallelCount: parallelGroups.length,
+    parallelogram: para
+  };
 }
 
 function dDraw(){
@@ -632,28 +705,16 @@ function dDraw(){
   }
   dctx.restore();
 
-  const vLines = drawnLines.filter(l => l.type === 'v').map(l => l.pos);
-  const hLines = drawnLines.filter(l => l.type === 'h').map(l => l.pos);
+  // 若有平行四邊形 → 畫綠色區域
   const state = getDrawState();
-
-  if (state.isParallelogram){
-    const vx1 = Math.min(...vLines);
-    const vx2 = Math.max(...vLines);
-    const hp1 = Math.min(...hLines);
-    const hp2 = Math.max(...hLines);
-    const baseY = tri.y - tri.size;
-
-    const p1 = { x: vx1, y: vx1 - hp1 + baseY };
-    const p2 = { x: vx2, y: vx2 - hp1 + baseY };
-    const p3 = { x: vx2, y: vx2 - hp2 + baseY };
-    const p4 = { x: vx1, y: vx1 - hp2 + baseY };
-
+  if (state.parallelogram){
+    const [P1, P2, P3, P4] = state.parallelogram;
     dctx.save();
     dctx.beginPath();
-    dctx.moveTo(p1.x, p1.y);
-    dctx.lineTo(p2.x, p2.y);
-    dctx.lineTo(p3.x, p3.y);
-    dctx.lineTo(p4.x, p4.y);
+    dctx.moveTo(P1.x, P1.y);
+    dctx.lineTo(P2.x, P2.y);
+    dctx.lineTo(P3.x, P3.y);
+    dctx.lineTo(P4.x, P4.y);
     dctx.closePath();
     dctx.fillStyle = 'rgba(74, 222, 128, 0.30)';
     dctx.fill();
@@ -661,18 +722,19 @@ function dDraw(){
     dctx.lineWidth = 4;
     dctx.stroke();
 
-    const centerX = (p1.x + p3.x) / 2;
-    const centerY = (p1.y + p3.y) / 2;
+    const cx = (P1.x + P2.x + P3.x + P4.x) / 4;
+    const cy = (P1.y + P2.y + P3.y + P4.y) / 4;
     dctx.fillStyle = '#15803d';
     dctx.font = 'bold 18px system-ui,sans-serif';
     dctx.textAlign = 'center';
     dctx.textBaseline = 'middle';
-    dctx.fillText('✅ 平行四邊形！', centerX, centerY - 5);
+    dctx.fillText('✅ 平行四邊形！', cx, cy - 5);
     dctx.font = '13px system-ui,sans-serif';
-    dctx.fillText('兩組對邊分別平行', centerX, centerY + 20);
+    dctx.fillText('兩組對邊分別平行', cx, cy + 20);
     dctx.restore();
   }
 
+  // 畫已畫的線
   dctx.save();
   dctx.beginPath();
   dctx.rect(2, DRAW_TOP, DW - 4, DRAW_BOTTOM - DRAW_TOP);
@@ -680,23 +742,15 @@ function dDraw(){
   dctx.lineCap = 'round';
   dctx.lineWidth = 3.5;
   drawnLines.forEach(line => {
-    if (line.type === 'v'){
-      dctx.strokeStyle = '#ef4444';
-      dctx.beginPath();
-      dctx.moveTo(line.pos, DRAW_TOP);
-      dctx.lineTo(line.pos, DRAW_BOTTOM);
-      dctx.stroke();
-    } else {
-      const pt = hypotenusePoints(line.pos);
-      dctx.strokeStyle = '#8b5cf6';
-      dctx.beginPath();
-      dctx.moveTo(pt.x0, pt.y0);
-      dctx.lineTo(pt.x1, pt.y1);
-      dctx.stroke();
-    }
+    dctx.strokeStyle = line.type === 'v' ? '#ef4444' : '#8b5cf6';
+    dctx.beginPath();
+    dctx.moveTo(line.x1, line.y1);
+    dctx.lineTo(line.x2, line.y2);
+    dctx.stroke();
   });
   dctx.restore();
 
+  // 畫直尺
   dctx.save();
   dctx.fillStyle = 'rgba(253,230,138,0.95)';
   dctx.strokeStyle = '#d97706';
@@ -734,6 +788,7 @@ function dDraw(){
   dctx.fillText('直 尺', RULER.x + RULER.w/2, RULER.y + RULER.h/2 - 2);
   dctx.restore();
 
+  // 拖動預覽線
   if (draggingTri){
     dctx.save();
     dctx.beginPath();
@@ -741,33 +796,32 @@ function dDraw(){
     dctx.clip();
     dctx.setLineDash([8, 6]);
     dctx.lineWidth = 3;
-    if (drawMode === 'vertical'){
-      dctx.strokeStyle = 'rgba(239,68,68,0.45)';
+
+    const seg = getExtendedSegment(drawMode, tri.x, tri.y, triAngle);
+    if (seg){
+      dctx.strokeStyle = drawMode === 'vertical'
+        ? 'rgba(239,68,68,0.45)' : 'rgba(139,92,246,0.5)';
       dctx.beginPath();
-      dctx.moveTo(tri.x, DRAW_TOP);
-      dctx.lineTo(tri.x, DRAW_BOTTOM);
-      dctx.stroke();
-    } else {
-      const pt = hypotenusePoints(tri.x);
-      dctx.strokeStyle = 'rgba(139,92,246,0.5)';
-      dctx.beginPath();
-      dctx.moveTo(pt.x0, pt.y0);
-      dctx.lineTo(pt.x1, pt.y1);
+      dctx.moveTo(seg.x1, seg.y1);
+      dctx.lineTo(seg.x2, seg.y2);
       dctx.stroke();
     }
     dctx.restore();
   }
 
+  // 畫三角尺（用 translate + rotate）
   dctx.save();
-  const tx = tri.x, ty = tri.y, s = tri.size;
+  dctx.translate(tri.x, tri.y);
+  dctx.rotate(triAngle);
+  const s = tri.size;
 
   dctx.beginPath();
-  dctx.moveTo(tx, ty);
-  dctx.lineTo(tx + s, ty);
-  dctx.lineTo(tx, ty - s);
+  dctx.moveTo(0, 0);
+  dctx.lineTo(s, 0);
+  dctx.lineTo(0, -s);
   dctx.closePath();
 
-  const grad = dctx.createLinearGradient(tx, ty, tx + s, ty - s);
+  const grad = dctx.createLinearGradient(0, 0, s, -s);
   grad.addColorStop(0, 'rgba(59,130,246,0.35)');
   grad.addColorStop(1, 'rgba(37,99,235,0.15)');
   dctx.fillStyle = grad;
@@ -778,15 +832,17 @@ function dDraw(){
   dctx.lineJoin = 'round';
   dctx.stroke();
 
+  // 直角標記
   const rs = 15;
   dctx.beginPath();
-  dctx.moveTo(tx + rs, ty);
-  dctx.lineTo(tx + rs, ty - rs);
-  dctx.lineTo(tx, ty - rs);
+  dctx.moveTo(rs, 0);
+  dctx.lineTo(rs, -rs);
+  dctx.lineTo(0, -rs);
   dctx.strokeStyle = '#1e40af';
   dctx.lineWidth = 2;
   dctx.stroke();
 
+  // 高亮選中的邊
   dctx.save();
   dctx.lineCap = 'round';
   dctx.setLineDash([8, 5]);
@@ -794,57 +850,56 @@ function dDraw(){
   dctx.beginPath();
   if (drawMode === 'vertical'){
     dctx.strokeStyle = '#ef4444';
-    dctx.moveTo(tx, ty);
-    dctx.lineTo(tx, ty - s);
+    dctx.moveTo(0, 0);
+    dctx.lineTo(0, -s);
   } else {
     dctx.strokeStyle = '#8b5cf6';
-    dctx.moveTo(tx + s, ty);
-    dctx.lineTo(tx, ty - s);
+    dctx.moveTo(s, 0);
+    dctx.lineTo(0, -s);
   }
   dctx.stroke();
   dctx.restore();
 
+  // 標籤（不隨旋轉）
+  dctx.save();
+  dctx.rotate(-triAngle);
   dctx.fillStyle = '#1e40af';
   dctx.font = 'bold 15px system-ui,sans-serif';
   dctx.textAlign = 'center';
   dctx.textBaseline = 'middle';
-  dctx.fillText('三角尺', tx + s/2, ty - s/2 - 8);
-
-  if(!draggingTri){
+  dctx.fillText('三角尺', tri.size/2, -tri.size/2 - 8);
+  if (!draggingTri){
     dctx.fillStyle = '#64748b';
     dctx.font = '13px system-ui,sans-serif';
-    dctx.fillText('👆 可拖動', tx + s/2, ty - s/2 + 14);
+    dctx.fillText('👆 可拖動', tri.size/2, -tri.size/2 + 14);
   }
   dctx.restore();
 
+  dctx.restore();
+
+  // 狀態提示（左上角）
   dctx.save();
   dctx.font = '13px system-ui,sans-serif';
   dctx.textAlign = 'left';
   dctx.textBaseline = 'top';
 
-  const vCount = drawnLines.filter(l => l.type === 'v').length;
-  const hCount = drawnLines.filter(l => l.type === 'h').length;
-
-  let hintText = (drawMode === 'vertical')
+  const label = drawMode === 'vertical'
     ? '沿 🔴 紅色虛線（直邊）畫線'
     : '沿 🟣 紫色虛線（斜邊）畫線';
-  dctx.fillStyle = (drawMode === 'vertical') ? '#dc2626' : '#7c3aed';
+  dctx.fillStyle = drawMode === 'vertical' ? '#dc2626' : '#7c3aed';
   dctx.font = 'bold 13px system-ui,sans-serif';
-  dctx.fillText(hintText, 18, 12);
+  dctx.fillText(label, 18, 12);
 
-  if (vCount > 0 || hCount > 0){
+  if (!rulerLocked){
+    dctx.fillStyle = '#b45309';
+    dctx.font = 'bold 13px system-ui,sans-serif';
+    dctx.fillText('⚠️ 直尺已鬆開，三角尺方向已改變', 18, 34);
+  } else if (drawnLines.length > 0){
+    dctx.fillStyle = '#475569';
     dctx.font = '13px system-ui,sans-serif';
-    let xOff = 18;
-    if (vCount > 0){
-      dctx.fillStyle = '#ef4444';
-      dctx.fillText(`🔴 直邊線 ${vCount} 條`, xOff, 34);
-      xOff += 130;
-    }
-    if (hCount > 0){
-      dctx.fillStyle = '#8b5cf6';
-      dctx.fillText(`🟣 斜邊線 ${hCount} 條`, xOff, 34);
-    }
+    dctx.fillText(`已畫 ${drawnLines.length} 條線`, 18, 34);
   }
+
   dctx.restore();
 }
 
@@ -861,9 +916,10 @@ window.addEventListener('resize', dResize);
 
 dcv.addEventListener('pointerdown', e => {
   const p = dToLogical(e);
-  if(pointInTriangle(p.x, p.y)){
+  if (pointInTriangle(p.x, p.y)){
     draggingTri = true;
     dragOffsetX = p.x - tri.x;
+    dragOffsetY = p.y - tri.y;
     dcv.setPointerCapture(e.pointerId);
     dcv.style.cursor = 'grabbing';
     e.preventDefault();
@@ -872,10 +928,16 @@ dcv.addEventListener('pointerdown', e => {
 
 dcv.addEventListener('pointermove', e => {
   const p = dToLogical(e);
-  if(draggingTri){
-    let newX = p.x - dragOffsetX;
-    newX = Math.max(RULER.x + 5, Math.min(RULER.x + RULER.w - tri.size - 5, newX));
-    tri.x = newX;
+  if (draggingTri){
+    if (rulerLocked){
+      // 只允許水平移動（沿直尺）
+      tri.x = clamp(p.x - dragOffsetX, RULER.x + 5, RULER.x + RULER.w - tri.size - 5);
+      tri.y = RULER.y;
+    } else {
+      // 自由移動
+      tri.x = clamp(p.x - dragOffsetX, 20, DW - tri.size - 20);
+      tri.y = clamp(p.y - dragOffsetY, 20, DH - 20);
+    }
     dDraw();
   } else {
     dcv.style.cursor = pointInTriangle(p.x, p.y) ? 'grab' : 'default';
@@ -883,7 +945,7 @@ dcv.addEventListener('pointermove', e => {
 });
 
 function endTriDrag(){
-  if(draggingTri){
+  if (draggingTri){
     draggingTri = false;
     dcv.style.cursor = 'default';
     dDraw();
@@ -897,21 +959,13 @@ function updateDemoText(){
   const state = getDrawState();
 
   if (drawnLines.length === 0){
-    if (drawMode === 'vertical'){
-      text.textContent = '① 選擇「直邊」，把三角尺移到想要的位置，然後按「畫一條線」。';
-    } else {
-      text.textContent = '① 選擇「斜邊」，把三角尺移到想要的位置，然後按「畫一條線」。';
-    }
-  } else if (state.isParallelogram){
+    text.textContent = '① 選擇「直邊」，把三角尺移到想要的位置，然後按「畫一條線」。';
+  } else if (state.parallelogram){
     text.textContent = '🎉 成功！兩組平行線圍出了平行四邊形！綠色區域就是證明！';
-  } else if (state.vCount >= 1 && state.hCount === 0){
-    text.textContent = `✅ 你畫了 ${state.vCount} 條直邊線，它們互相平行！切換到「斜邊」，畫出另一組平行線吧。`;
-  } else if (state.vCount === 0 && state.hCount >= 1){
-    text.textContent = `✅ 你畫了 ${state.hCount} 條斜邊線，它們互相平行！切換到「直邊」，畫出另一組平行線吧。`;
-  } else if (state.vCount === 1 && state.hCount === 1){
-    text.textContent = '⚠️ 還未圍成平行四邊形！需要至少2條直邊線和2條斜邊線，請繼續畫。';
+  } else if (state.parallelCount === 0){
+    text.textContent = `⚠️ 目前沒有平行線。試試把三角尺扣回直尺，再畫一條方向相同的線。`;
   } else {
-    text.textContent = `✅ 目前有 ${state.vCount} 條直邊線、${state.hCount} 條斜邊線，請繼續畫，直到圍成平行四邊形。`;
+    text.textContent = `✅ 你畫了 ${drawnLines.length} 條線，其中 ${state.parallelCount} 組互相平行。再畫出另一組平行的線，就能圍成平行四邊形！`;
   }
 }
 
@@ -927,16 +981,30 @@ document.querySelectorAll('.edge-btn').forEach(btn => {
 
 $('d-draw').addEventListener('click', () => {
   const type = (drawMode === 'vertical') ? 'v' : 'h';
-  const pos = tri.x;
 
-  const tooClose = drawnLines.some(l => l.type === type && Math.abs(l.pos - pos) < 15);
+  // 避免與現有線太近
+  const tooClose = drawnLines.some(l =>
+    l.type === type &&
+    Math.hypot(l.srcX - tri.x, l.srcY - tri.y) < 15 &&
+    Math.abs((l.angle || 0) - triAngle) < 0.08
+  );
   if (tooClose){
     const text = $('d-text');
-    text.textContent = '⚠️ 這條線和之前的線太近了，請把三角尺移到其他位置再畫。';
+    text.textContent = '⚠️ 這條線和之前的線太近了，請移動三角尺到其他位置再畫。';
     return;
   }
 
-  drawnLines.push({ type, pos });
+  const seg = getExtendedSegment(type, tri.x, tri.y, triAngle);
+  if (!seg) return;
+
+  drawnLines.push({
+    type,
+    x1: seg.x1, y1: seg.y1,
+    x2: seg.x2, y2: seg.y2,
+    srcX: tri.x, srcY: tri.y,
+    angle: triAngle
+  });
+
   dDraw();
   updateDemoText();
 });
@@ -949,6 +1017,50 @@ $('d-clear').addEventListener('click', () => {
 
 $('d-reset-tri').addEventListener('click', () => {
   tri.x = 200;
+  tri.y = RULER.y;
+  triAngle = 0;
+  rulerLocked = true;
+  $('d-release').textContent = '🔓 鬆開直尺';
+  $('d-release').classList.remove('active');
+  $('rotate-controls').classList.remove('show');
+  dDraw();
+  updateDemoText();
+});
+
+/* ★ 鬆開 / 扣回直尺 ★ */
+$('d-release').addEventListener('click', () => {
+  rulerLocked = !rulerLocked;
+
+  if (rulerLocked){
+    // 扣回：恢復到直尺上
+    $('d-release').textContent = '🔓 鬆開直尺';
+    $('d-release').classList.remove('active');
+    $('rotate-controls').classList.remove('show');
+    tri.y = RULER.y;
+    triAngle = 0;
+    const text = $('d-text');
+    text.textContent = '🔒 直尺已扣緊。三角尺只能沿直尺左右滑動，畫出的線會互相平行。';
+  } else {
+    // 鬆開：三角尺可以自由移動 + 旋轉
+    $('d-release').textContent = '🔒 扣回直尺';
+    $('d-release').classList.add('active');
+    $('rotate-controls').classList.add('show');
+    const text = $('d-text');
+    text.textContent = '🔓 直尺已鬆開！試試用「左轉 / 右轉」改變三角尺方向，再畫一條線，看看兩條線還會不會平行。';
+  }
+  dDraw();
+});
+
+/* ★ 旋轉三角尺 ★ */
+$('d-rotate-l').addEventListener('click', () => {
+  if (rulerLocked) return;
+  triAngle -= Math.PI / 18;  // 10 度
+  dDraw();
+});
+
+$('d-rotate-r').addEventListener('click', () => {
+  if (rulerLocked) return;
+  triAngle += Math.PI / 18;  // 10 度
   dDraw();
 });
 
@@ -1389,7 +1501,7 @@ $('btn-reset').addEventListener('click', () => {
 });
 
 /* ============================================================
-   小測驗：5題（3易2難）
+   小測驗：5題
    ============================================================ */
 const quizCanvas = document.getElementById('quiz-canvas');
 const quizCtx = quizCanvas.getContext('2d');
@@ -1624,14 +1736,14 @@ function gridResize(){
 }
 window.addEventListener('resize', gridResize);
 
-function lineSlope(l){
+function gridLineSlope(l){
   const dx = l.x2 - l.x1;
   const dy = l.y2 - l.y1;
   if (Math.abs(dx) < 1) return Infinity;
   return dy / dx;
 }
 
-function slopesMatch(s1, s2){
+function gridSlopesMatch(s1, s2){
   if (s1 === Infinity && s2 === Infinity) return true;
   if (s1 === Infinity || s2 === Infinity) return false;
   return Math.abs(s1 - s2) < 0.15;
@@ -1639,7 +1751,7 @@ function slopesMatch(s1, s2){
 
 function computeLineColors(){
   const colors = new Array(gridLines.length).fill('#94a3b8');
-  const slopes = gridLines.map(lineSlope);
+  const slopes = gridLines.map(gridLineSlope);
   const groups = [];
   const used = new Array(gridLines.length).fill(false);
 
@@ -1648,7 +1760,7 @@ function computeLineColors(){
     const group = [i];
     used[i] = true;
     for (let j = i+1; j < gridLines.length; j++){
-      if (!used[j] && slopesMatch(slopes[i], slopes[j])){
+      if (!used[j] && gridSlopesMatch(slopes[i], slopes[j])){
         group.push(j);
         used[j] = true;
       }
@@ -1754,7 +1866,6 @@ gridCanvas.addEventListener('pointerdown', e => {
   drawGrid();
 });
 
-/* ★★★ 寬鬆的相交判斷：允許線段延伸一個格子的距離 ★★★ */
 function lineIntersectionT(L1, L2){
   const d1x = L1.x2 - L1.x1, d1y = L1.y2 - L1.y1;
   const d2x = L2.x2 - L2.x1, d2y = L2.y2 - L2.y1;
@@ -1765,17 +1876,13 @@ function lineIntersectionT(L1, L2){
   return { t, u };
 }
 
-/* 檢查兩條線段是否「大致上」相交（允許延伸 pixelTol 像素） */
 function segmentsRoughlyIntersect(L1, L2, pixelTol){
   const r = lineIntersectionT(L1, L2);
   if (!r) return false;
-
   const len1 = Math.hypot(L1.x2 - L1.x1, L1.y2 - L1.y1);
   const len2 = Math.hypot(L2.x2 - L2.x1, L2.y2 - L2.y1);
-
   const tTol = pixelTol / len1;
   const uTol = pixelTol / len2;
-
   return (r.t >= -tTol && r.t <= 1 + tTol &&
           r.u >= -uTol && r.u <= 1 + uTol);
 }
@@ -1789,8 +1896,7 @@ function updateGridStatus(){
     return;
   }
 
-  // 按斜率分組
-  const slopes = gridLines.map(lineSlope);
+  const slopes = gridLines.map(gridLineSlope);
   const groups = [];
   const used = new Array(gridLines.length).fill(false);
 
@@ -1799,7 +1905,7 @@ function updateGridStatus(){
     const group = [i];
     used[i] = true;
     for (let j = i+1; j < gridLines.length; j++){
-      if (!used[j] && slopesMatch(slopes[i], slopes[j])){
+      if (!used[j] && gridSlopesMatch(slopes[i], slopes[j])){
         group.push(j);
         used[j] = true;
       }
@@ -1819,8 +1925,7 @@ function updateGridStatus(){
     return;
   }
 
-  // ★ 允許線段延伸一個格子(25像素)的距離來判斷是否圍成四邊形
-  const pixelTol = GRID;  // 25 像素
+  const pixelTol = GRID;
   let foundQuad = false;
 
   for (let g1 = 0; g1 < parallelGroups.length && !foundQuad; g1++){
@@ -1837,7 +1942,6 @@ function updateGridStatus(){
               const M1 = gridLines[B[j1]];
               const M2 = gridLines[B[j2]];
 
-              // 4 個交點都要「大致上」落在線段內
               const ok =
                 segmentsRoughlyIntersect(L1, M1, pixelTol) &&
                 segmentsRoughlyIntersect(L1, M2, pixelTol) &&
